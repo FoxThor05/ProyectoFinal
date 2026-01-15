@@ -1,0 +1,1820 @@
+fileFormatVersion: 2
+guid: 94626289553b06b409d8518643fcc19e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5418626065145246846
+    second: Miku_0
+  - first:
+      213: -4894237041259454815
+    second: Miku_1
+  - first:
+      213: -5148103536991207198
+    second: Miku_2
+  - first:
+      213: 182459598769885520
+    second: Miku_3
+  - first:
+      213: -8798108129918209616
+    second: Miku_4
+  - first:
+      213: 2100069854549680971
+    second: Miku_5
+  - first:
+      213: 1943761771531719006
+    second: Miku_6
+  - first:
+      213: 8725755266101247776
+    second: Miku_7
+  - first:
+      213: 6912920545646262442
+    second: Miku_8
+  - first:
+      213: -3342832102429801670
+    second: Miku_9
+  - first:
+      213: -7057748733738338339
+    second: Miku_10
+  - first:
+      213: 9084103063731810601
+    second: Miku_11
+  - first:
+      213: 1813170376584174313
+    second: Miku_12
+  - first:
+      213: -1857774367713816394
+    second: Miku_13
+  - first:
+      213: 3142266476488597260
+    second: Miku_14
+  - first:
+      213: 6426244424247803667
+    second: Miku_15
+  - first:
+      213: 121142683260316667
+    second: Miku_16
+  - first:
+      213: 7921502261196577315
+    second: Miku_17
+  - first:
+      213: 5261108132786809926
+    second: Miku_18
+  - first:
+      213: 5173042840589054471
+    second: Miku_19
+  - first:
+      213: -1853253231329591883
+    second: Miku_20
+  - first:
+      213: -6842861119581365383
+    second: Miku_21
+  - first:
+      213: 282468380791800921
+    second: Miku_22
+  - first:
+      213: -5154871248609715101
+    second: Miku_23
+  - first:
+      213: 1077812034011603892
+    second: Miku_24
+  - first:
+      213: -4261692465597486949
+    second: Miku_25
+  - first:
+      213: 3551560131389928216
+    second: Miku_26
+  - first:
+      213: -2888051791208222978
+    second: Miku_27
+  - first:
+      213: -8733097918589906670
+    second: Miku_28
+  - first:
+      213: 4358110229721698792
+    second: Miku_29
+  - first:
+      213: -1237901546954485626
+    second: Miku_30
+  - first:
+      213: 8025084385800707017
+    second: Miku_31
+  - first:
+      213: 6903195619679992656
+    second: Miku_32
+  - first:
+      213: -5220195354227295074
+    second: Miku_33
+  - first:
+      213: -6442578540145001359
+    second: Miku_34
+  - first:
+      213: 6848685426387261492
+    second: Miku_35
+  - first:
+      213: -3643268472273467999
+    second: Miku_36
+  - first:
+      213: -4967237195355049367
+    second: Miku_37
+  - first:
+      213: 6908466840311302689
+    second: Miku_38
+  - first:
+      213: -7163895871029068846
+    second: Miku_39
+  - first:
+      213: -3901795702029891679
+    second: Miku_40
+  - first:
+      213: 3983540252563451673
+    second: Miku_41
+  - first:
+      213: -7688149399340867539
+    second: Miku_42
+  - first:
+      213: -5083369446960259487
+    second: Miku_43
+  - first:
+      213: 5745931656069749149
+    second: Miku_44
+  - first:
+      213: -623240144962086120
+    second: Miku_45
+  - first:
+      213: -721422029862757639
+    second: Miku_46
+  - first:
+      213: 6867073308372905207
+    second: Miku_47
+  - first:
+      213: 7034164300670483870
+    second: Miku_48
+  - first:
+      213: 1613252603441706827
+    second: Miku_49
+  - first:
+      213: 741911071888012369
+    second: Miku_50
+  - first:
+      213: 6755698710554804525
+    second: Miku_51
+  - first:
+      213: -7729390629845255463
+    second: Miku_52
+  - first:
+      213: 3835470551535340733
+    second: Miku_53
+  - first:
+      213: -2403796915858884310
+    second: Miku_54
+  - first:
+      213: -4961987358543287975
+    second: Miku_55
+  - first:
+      213: 278634706058514354
+    second: Miku_56
+  - first:
+      213: -2009846810066090702
+    second: Miku_57
+  - first:
+      213: 5488633782486138038
+    second: Miku_58
+  - first:
+      213: 1656964051318981663
+    second: Miku_59
+  - first:
+      213: 7004241795826720112
+    second: Miku_60
+  - first:
+      213: 1146100466651354459
+    second: Miku_61
+  - first:
+      213: 8710927262187367906
+    second: Miku_62
+  - first:
+      213: 3174879823809193405
+    second: Miku_63
+  - first:
+      213: -1951352993286596296
+    second: Miku_64
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Miku_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 432
+        width: 55
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28b48588d4c2dc4b0800000000000000
+      internalID: -5418626065145246846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_1
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 371
+        width: 61
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1aedb2d775d241cb0800000000000000
+      internalID: -4894237041259454815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_2
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 432
+        width: 54
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e005b2eb134e88b0800000000000000
+      internalID: -5148103536991207198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_3
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 432
+        width: 55
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0511a82d90a388200800000000000000
+      internalID: 182459598769885520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_4
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 432
+        width: 54
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b1bfbc2547d6e580800000000000000
+      internalID: -8798108129918209616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_5
+      rect:
+        serializedVersion: 2
+        x: 241
+        y: 432
+        width: 51
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b43a0f3f762f42d10800000000000000
+      internalID: 2100069854549680971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_6
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e51d1206801a9fa10800000000000000
+      internalID: 1943761771531719006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_7
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 369
+        width: 63
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02f75f8fe2c181970800000000000000
+      internalID: 8725755266101247776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_8
+      rect:
+        serializedVersion: 2
+        x: 359
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa8bebb2c90afef50800000000000000
+      internalID: 6912920545646262442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_9
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3346e6f9efdb91d0800000000000000
+      internalID: -3342832102429801670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_10
+      rect:
+        serializedVersion: 2
+        x: 477
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd730939be6dd0e90800000000000000
+      internalID: -7057748733738338339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_11
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 921b5c85b97311e70800000000000000
+      internalID: 9084103063731810601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_12
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 432
+        width: 55
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ea9f85d9dca92910800000000000000
+      internalID: 1813170376584174313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_13
+      rect:
+        serializedVersion: 2
+        x: 650
+        y: 432
+        width: 54
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b097933e0cd736e0800000000000000
+      internalID: -1857774367713816394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_14
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 432
+        width: 55
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0f98b046b29b9b20800000000000000
+      internalID: 3142266476488597260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_15
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 432
+        width: 54
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31fff13914b9e2950800000000000000
+      internalID: 6426244424247803667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_16
+      rect:
+        serializedVersion: 2
+        x: 831
+        y: 432
+        width: 51
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bfb6edae0a26ea100800000000000000
+      internalID: 121142683260316667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_17
+      rect:
+        serializedVersion: 2
+        x: 890
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32a531e2654deed60800000000000000
+      internalID: 7921502261196577315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_18
+      rect:
+        serializedVersion: 2
+        x: 949
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64c2da3e8f5330940800000000000000
+      internalID: 5261108132786809926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_19
+      rect:
+        serializedVersion: 2
+        x: 1009
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70230393e075ac740800000000000000
+      internalID: 5173042840589054471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_20
+      rect:
+        serializedVersion: 2
+        x: 1067
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bd31cb410ce746e0800000000000000
+      internalID: -1853253231329591883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_21
+      rect:
+        serializedVersion: 2
+        x: 1124
+        y: 432
+        width: 53
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97b550811164901a0800000000000000
+      internalID: -6842861119581365383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_22
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 364
+        width: 60
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9540069ee778be300800000000000000
+      internalID: 282468380791800921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_23
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 364
+        width: 58
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36c5ebb39e73678b0800000000000000
+      internalID: -5154871248609715101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_24
+      rect:
+        serializedVersion: 2
+        x: 247
+        y: 364
+        width: 61
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b327ed955825fe00800000000000000
+      internalID: 1077812034011603892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_25
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 365
+        width: 72
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b986a1e284d6bd4c0800000000000000
+      internalID: -4261692465597486949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_26
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 365
+        width: 76
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 813bfed5f1da94130800000000000000
+      internalID: 3551560131389928216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_27
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 365
+        width: 69
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efe6a1c82349be7d0800000000000000
+      internalID: -2888051791208222978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_28
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 266
+        width: 57
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 211deb586bdcdc680800000000000000
+      internalID: -8733097918589906670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_29
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 263
+        width: 48
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e1de86e92e1b7c30800000000000000
+      internalID: 4358110229721698792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_30
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 263
+        width: 44
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6801fda0a1712dee0800000000000000
+      internalID: -1237901546954485626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_31
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 262
+        width: 58
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cb5f2ceab3de5f60800000000000000
+      internalID: 8025084385800707017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_32
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 262
+        width: 71
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05bfe0667d31dcf50800000000000000
+      internalID: 6903195619679992656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_33
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 262
+        width: 68
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9c332dabf32e87b0800000000000000
+      internalID: -5220195354227295074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_34
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 262
+        width: 57
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17c3a15b3fc5796a0800000000000000
+      internalID: -6442578540145001359
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_35
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 266
+        width: 73
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43815320c1b6b0f50800000000000000
+      internalID: 6848685426387261492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_36
+      rect:
+        serializedVersion: 2
+        x: 633
+        y: 266
+        width: 63
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a582c890a2807dc0800000000000000
+      internalID: -3643268472273467999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_37
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 195
+        width: 54
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96231cf9614d01bb0800000000000000
+      internalID: -4967237195355049367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_38
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 195
+        width: 56
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12a02571dfdcfdf50800000000000000
+      internalID: 6908466840311302689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_39
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 196
+        width: 60
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2dbbc6749aab49c90800000000000000
+      internalID: -7163895871029068846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_40
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 195
+        width: 80
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a7cc5a4b790ad9c0800000000000000
+      internalID: -3901795702029891679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_41
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 196
+        width: 85
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91fa38601c0684730800000000000000
+      internalID: 3983540252563451673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_42
+      rect:
+        serializedVersion: 2
+        x: 429
+        y: 195
+        width: 78
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d20a728dad43e4590800000000000000
+      internalID: -7688149399340867539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_43
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 195
+        width: 71
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16e1cdbbb6e3479b0800000000000000
+      internalID: -5083369446960259487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_44
+      rect:
+        serializedVersion: 2
+        x: 608
+        y: 195
+        width: 62
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9995bfd566adbf40800000000000000
+      internalID: 5745931656069749149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_45
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 130
+        width: 58
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81b95c5e36ec957f0800000000000000
+      internalID: -623240144962086120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_46
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 130
+        width: 58
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fa93e07c7efcf5f0800000000000000
+      internalID: -721422029862757639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_47
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 130
+        width: 58
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fc22286acebc4f50800000000000000
+      internalID: 6867073308372905207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_48
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 130
+        width: 58
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9db231b92f5e9160800000000000000
+      internalID: 7034164300670483870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_49
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 128
+        width: 73
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b47fd1902bc636610800000000000000
+      internalID: 1613252603441706827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_50
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 68
+        width: 60
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15470d6603ccb4a00800000000000000
+      internalID: 741911071888012369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_51
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 69
+        width: 68
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d210f2c1f2011cd50800000000000000
+      internalID: 6755698710554804525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_52
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 67
+        width: 81
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9da37d99c20bbb490800000000000000
+      internalID: -7729390629845255463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_53
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 0
+        width: 61
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbc4cba35245a3530800000000000000
+      internalID: 3835470551535340733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_54
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 0
+        width: 54
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a293d0ed07ff3aed0800000000000000
+      internalID: -2403796915858884310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_55
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 0
+        width: 61
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9596c0289ca732bb0800000000000000
+      internalID: -4961987358543287975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_56
+      rect:
+        serializedVersion: 2
+        x: 252
+        y: 0
+        width: 63
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bf86b4f9c8edd300800000000000000
+      internalID: 278634706058514354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_57
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 0
+        width: 62
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2350f0199f69b14e0800000000000000
+      internalID: -2009846810066090702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_58
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 0
+        width: 57
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bc7b4b585b8b2c40800000000000000
+      internalID: 5488633782486138038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_59
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 0
+        width: 61
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f14c5749608bef610800000000000000
+      internalID: 1656964051318981663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_60
+      rect:
+        serializedVersion: 2
+        x: 607
+        y: 0
+        width: 54
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07d1231adc0143160800000000000000
+      internalID: 7004241795826720112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_61
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 0
+        width: 61
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b55d9a75d44c7ef00800000000000000
+      internalID: 1146100466651354459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_62
+      rect:
+        serializedVersion: 2
+        x: 777
+        y: 0
+        width: 63
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2eda1f6413e63e870800000000000000
+      internalID: 8710927262187367906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_63
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 0
+        width: 62
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db5a3b6e0607f0c20800000000000000
+      internalID: 3174879823809193405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Miku_64
+      rect:
+        serializedVersion: 2
+        x: 946
+        y: 0
+        width: 57
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 839d1c39ac66be4e0800000000000000
+      internalID: -1951352993286596296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Miku_0: -5418626065145246846
+      Miku_1: -4894237041259454815
+      Miku_10: -7057748733738338339
+      Miku_11: 9084103063731810601
+      Miku_12: 1813170376584174313
+      Miku_13: -1857774367713816394
+      Miku_14: 3142266476488597260
+      Miku_15: 6426244424247803667
+      Miku_16: 121142683260316667
+      Miku_17: 7921502261196577315
+      Miku_18: 5261108132786809926
+      Miku_19: 5173042840589054471
+      Miku_2: -5148103536991207198
+      Miku_20: -1853253231329591883
+      Miku_21: -6842861119581365383
+      Miku_22: 282468380791800921
+      Miku_23: -5154871248609715101
+      Miku_24: 1077812034011603892
+      Miku_25: -4261692465597486949
+      Miku_26: 3551560131389928216
+      Miku_27: -2888051791208222978
+      Miku_28: -8733097918589906670
+      Miku_29: 4358110229721698792
+      Miku_3: 182459598769885520
+      Miku_30: -1237901546954485626
+      Miku_31: 8025084385800707017
+      Miku_32: 6903195619679992656
+      Miku_33: -5220195354227295074
+      Miku_34: -6442578540145001359
+      Miku_35: 6848685426387261492
+      Miku_36: -3643268472273467999
+      Miku_37: -4967237195355049367
+      Miku_38: 6908466840311302689
+      Miku_39: -7163895871029068846
+      Miku_4: -8798108129918209616
+      Miku_40: -3901795702029891679
+      Miku_41: 3983540252563451673
+      Miku_42: -7688149399340867539
+      Miku_43: -5083369446960259487
+      Miku_44: 5745931656069749149
+      Miku_45: -623240144962086120
+      Miku_46: -721422029862757639
+      Miku_47: 6867073308372905207
+      Miku_48: 7034164300670483870
+      Miku_49: 1613252603441706827
+      Miku_5: 2100069854549680971
+      Miku_50: 741911071888012369
+      Miku_51: 6755698710554804525
+      Miku_52: -7729390629845255463
+      Miku_53: 3835470551535340733
+      Miku_54: -2403796915858884310
+      Miku_55: -4961987358543287975
+      Miku_56: 278634706058514354
+      Miku_57: -2009846810066090702
+      Miku_58: 5488633782486138038
+      Miku_59: 1656964051318981663
+      Miku_6: 1943761771531719006
+      Miku_60: 7004241795826720112
+      Miku_61: 1146100466651354459
+      Miku_62: 8710927262187367906
+      Miku_63: 3174879823809193405
+      Miku_64: -1951352993286596296
+      Miku_7: 8725755266101247776
+      Miku_8: 6912920545646262442
+      Miku_9: -3342832102429801670
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
