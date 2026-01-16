@@ -1,16 +1,78 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class AchievementItemUI : MonoBehaviour
 {
-    public Text title;
-    public Text description;
+    [Header("UI References")]
+    public TMP_Text title;
+    public TMP_Text description;
+    public Image backgroundPanel;
     public GameObject lockedOverlay;
+
+    [Header("Text Colors")]
+    public Color commonText = Color.white;
+    public Color rareText = Color.cyan;
+    public Color epicText = new Color(0.7f, 0.4f, 1f);
+    public Color legendaryText = new Color(1f, 0.75f, 0.2f);
+
+    [Header("Panel Colors")]
+    public Color commonBg = new Color(0.2f, 0.2f, 0.2f);
+    public Color rareBg = new Color(0.15f, 0.25f, 0.3f);
+    public Color epicBg = new Color(0.25f, 0.15f, 0.35f);
+    public Color legendaryBg = new Color(0.35f, 0.25f, 0.1f);
 
     public void Setup(AchievementDTO data, bool unlocked)
     {
         title.text = data.name;
         description.text = data.description;
+
+        ApplyRarityVisuals(data.rarity);
         lockedOverlay.SetActive(!unlocked);
+
+        if (!unlocked)
+            DimVisuals();
+    }
+
+    void ApplyRarityVisuals(string rarity)
+    {
+        rarity = rarity.ToLower();
+
+        Color bg;
+        Color text;
+
+        switch (rarity)
+        {
+            case "rare":
+                bg = rareBg;
+                text = rareText;
+                break;
+
+            case "epic":
+                bg = epicBg;
+                text = epicText;
+                break;
+
+            case "legendary":
+                bg = legendaryBg;
+                text = legendaryText;
+                break;
+
+            default:
+                bg = commonBg;
+                text = commonText;
+                break;
+        }
+
+        backgroundPanel.color = bg;
+        title.color = text;
+        description.color = text;
+    }
+
+    void DimVisuals()
+    {
+        backgroundPanel.color *= 0.5f;
+        title.color *= 0.6f;
+        description.color *= 0.6f;
     }
 }
