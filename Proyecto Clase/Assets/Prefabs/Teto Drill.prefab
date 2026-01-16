@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7191992262986155041}
   - component: {fileID: 1622882447666987568}
   - component: {fileID: 5083137400924712628}
-  - component: {fileID: 7869869758950261389}
+  - component: {fileID: -95051620511443513}
   m_Layer: 0
   m_Name: Teto Drill
   m_TagString: Projectile
@@ -180,7 +180,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &7869869758950261389
+--- !u!114 &-95051620511443513
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -189,8 +189,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 6345258886464729136}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 265398e829094c54b905ed576b7ba778, type: 3}
+  m_Script: {fileID: 11500000, guid: 1304f47fee1ae1f46b2bd07c646a7973, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyProjectile
+  m_EditorClassIdentifier: Assembly-CSharp::BossProjectile
   damage: 5
-  lifetime: 5
+  lifetime: 6

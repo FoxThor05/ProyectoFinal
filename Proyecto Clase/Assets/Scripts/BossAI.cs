@@ -302,12 +302,10 @@ public class BossAI : MonoBehaviour, IDamageable
     {
         anim.SetTrigger("Attack");
 
-        // ----- WAVE COUNTS -----
         int waves = 3;
         if (random)
         {
             waves = Tuning.randomCircleWaves;
-
             if (CurrentDifficulty == Difficulty.Nightmare &&
                 currentHealth <= maxHealth * 0.25f)
             {
@@ -315,26 +313,23 @@ public class BossAI : MonoBehaviour, IDamageable
             }
         }
 
-        // ----- TIMING -----
         float delay = currentHealth <= maxHealth * 0.25f ? 0.75f : 1f;
         float speed = random ? 7f : 6f;
 
         float baseOffset = 0f;
+        List<BoomerangProjectile> spawnedBooms = new List<BoomerangProjectile>();
+        bool attackEnded = false;
 
         for (int w = 0; w < waves; w++)
         {
             float offset = random ? Random.Range(0f, 360f) : baseOffset;
 
-            // ==========================================================
-            // NON-RANDOM CIRCLE WAVE (structured ring)
-            // ==========================================================
             if (!random)
             {
                 for (int angle = 0; angle < 360; angle += 15)
                 {
                     float finalAngle = angle + offset;
 
-                    // NIGHTMARE = BOOMERANG PROJECTILES
                     if (CurrentDifficulty == Difficulty.Nightmare)
                     {
                         GameObject proj = Instantiate(
@@ -345,11 +340,11 @@ public class BossAI : MonoBehaviour, IDamageable
 
                         BoomerangProjectile boom = proj.AddComponent<BoomerangProjectile>();
                         boom.speed = speed;
-                        boom.returnSpeed = currentHealth <= maxHealth * 0.25f
-                            ? speed * 1.75f
-                            : speed * 1.25f;
-
+                        boom.returnSpeed = currentHealth <= maxHealth * 0.25f ? speed * 1.75f : speed * 1.25f;
                         boom.boss = transform;
+                        boom.delayBeforeReturn = 0.5f;
+
+                        spawnedBooms.Add(boom);
                     }
                     else
                     {
@@ -357,23 +352,26 @@ public class BossAI : MonoBehaviour, IDamageable
                     }
                 }
             }
-            // ==========================================================
-            // RANDOM CIRCLE WAVE
-            // ==========================================================
             else
             {
                 int projectileCount = Tuning.randomCircleProjectiles;
-
                 for (int i = 0; i < projectileCount; i++)
                 {
                     float angle = Random.Range(0f, 360f);
-
                     FireAtAngle(angle, speed);
                 }
             }
 
             baseOffset += 5f;
             yield return new WaitForSeconds(delay);
+        }
+
+        // ----------------
+        // Nightmare: end attack as soon as any boomerang starts returning
+        // ----------------
+        if (CurrentDifficulty == Difficulty.Nightmare && spawnedBooms.Count > 0)
+        {
+            yield return new WaitUntil(() => spawnedBooms.Exists(b => b.startedReturn));
         }
     }
 
