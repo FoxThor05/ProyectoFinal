@@ -1,9 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
 public class AchievementToastManager : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private RectTransform toastContainer; // Top-right anchored container
+    [SerializeField] private RectTransform toastContainer;
     [SerializeField] private AchievementToastUI toastPrefab;
 
     [Header("Queue")]
@@ -11,21 +12,64 @@ public class AchievementToastManager : MonoBehaviour
 
     private float nextAllowedTime;
 
+    private AchievementManager boundManager;
+    private Coroutine bindRoutine;
+
     void OnEnable()
     {
-        if (AchievementManager.Instance != null)
-            AchievementManager.Instance.OnAchievementUnlocked += HandleUnlocked;
+        bindRoutine = StartCoroutine(BindLoop());
     }
 
     void OnDisable()
     {
-        if (AchievementManager.Instance != null)
-            AchievementManager.Instance.OnAchievementUnlocked -= HandleUnlocked;
+        if (bindRoutine != null)
+        {
+            StopCoroutine(bindRoutine);
+            bindRoutine = null;
+        }
+
+        Unbind();
+    }
+
+    IEnumerator BindLoop()
+    {
+        while (true)
+        {
+            if (AchievementManager.Instance == null)
+            {
+                yield return null;
+                continue;
+            }
+
+            if (boundManager != AchievementManager.Instance)
+            {
+                Unbind();
+                boundManager = AchievementManager.Instance;
+                boundManager.OnAchievementUnlocked += HandleUnlocked;
+
+                Debug.Log("[AchievementToastManager] Bound to AchievementManager.");
+            }
+
+            yield return null;
+        }
+    }
+
+    void Unbind()
+    {
+        if (boundManager != null)
+        {
+            boundManager.OnAchievementUnlocked -= HandleUnlocked;
+            boundManager = null;
+        }
     }
 
     void HandleUnlocked(AchievementDTO dto)
     {
-        if (!toastContainer || !toastPrefab || dto == null) return;
+        if (!toastContainer || !toastPrefab || dto == null)
+        {
+            Debug.LogWarning("[AchievementToastManager] Missing toastContainer/toastPrefab or DTO.");
+            return;
+        }
 
         if (Time.unscaledTime < nextAllowedTime)
             return;
@@ -34,5 +78,7 @@ public class AchievementToastManager : MonoBehaviour
 
         var toast = Instantiate(toastPrefab, toastContainer);
         toast.Show(dto);
+
+        Debug.Log($"[AchievementToastManager] Toast spawned for achievement id={dto.id}, name={dto.name}");
     }
 }

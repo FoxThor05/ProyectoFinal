@@ -14,7 +14,8 @@ public class GameManager : MonoBehaviour
         Gameplay,
         Paused,
         Menu,
-        Dead
+        Dead,
+        Victory
     }
 
     public GameState CurrentState { get; private set; } = GameState.Menu;
@@ -30,8 +31,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject deathScreen;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject loginMenu;
-    [SerializeField] private GameObject achievementsMenu;
     [SerializeField] private GameObject difficultyRestartPopup;
+    [SerializeField] private GameObject achievementsMenu;
+
+    [Header("Victory UI")]
+    [SerializeField] private GameObject victoryScreen;
+
+    // ---------------- RUN TRACKING ----------------
+    private bool tookDamageThisRun = false;
 
     // ---------------- LIFECYCLE ----------------
     void Awake()
@@ -50,8 +57,8 @@ public class GameManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name != "MenuInicial")
         {
-            SetState(GameState.Menu); // sets timeScale = 0, hides gameplay UI
-            SceneManager.LoadScene("MenuInicial"); // switch to your starting menu
+            SetState(GameState.Menu);
+            SceneManager.LoadScene("MenuInicial");
         }
     }
 
@@ -71,7 +78,6 @@ public class GameManager : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        // Prevent half-applied difficulty from being saved
         if (!Settings.difficultyPendingRestart)
             Settings.Save();
     }
@@ -86,20 +92,14 @@ public class GameManager : MonoBehaviour
     {
         if (pauseMenu) pauseMenu.SetActive(false);
         if (deathScreen) deathScreen.SetActive(false);
-        if (achievementsMenu) achievementsMenu.SetActive(false);
-
+        if (victoryScreen) victoryScreen.SetActive(false);
     }
 
     // ---------------- GAME FLOW ----------------
     public void StartNewGame()
     {
-        // HARD GATE: require an active profile (logged-in OR guest)
-        if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("StartNewGame blocked: no active profile. Opening login menu.");
-            OpenLoginMenu();
-            return;
-        }
+        // Reset run flags for "no damage run" achievement
+        tookDamageThisRun = false;
 
         Time.timeScale = 1f;
         SetState(GameState.Gameplay);
@@ -112,6 +112,7 @@ public class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        HideAllUI();
         SetState(GameState.Menu);
         SceneManager.LoadScene(mainMenuScene);
     }
@@ -159,32 +160,75 @@ public class GameManager : MonoBehaviour
                 Time.timeScale = 1f;
                 SetPauseMenu(false);
                 SetDeathScreen(false);
+                SetVictoryScreen(false);
                 break;
 
             case GameState.Paused:
                 Time.timeScale = 0f;
                 SetPauseMenu(true);
                 SetDeathScreen(false);
+                SetVictoryScreen(false);
                 break;
 
             case GameState.Menu:
                 Time.timeScale = 0f;
                 SetPauseMenu(false);
                 SetDeathScreen(false);
+                SetVictoryScreen(false);
                 break;
 
             case GameState.Dead:
                 Time.timeScale = 0f;
                 SetPauseMenu(false);
                 SetDeathScreen(true);
+                SetVictoryScreen(false);
+                break;
+
+            case GameState.Victory:
+                Time.timeScale = 0f;
+                SetPauseMenu(false);
+                SetDeathScreen(false);
+                SetVictoryScreen(true);
                 break;
         }
+    }
+
+    // ---------------- VICTORY ----------------
+    public void NotifyPlayerTookDamage()
+    {
+        tookDamageThisRun = true;
+    }
+
+    public void OnBossDefeated()
+    {
+        // Difficulty achievements: ids 5..9
+        // difficulty: 0 Easy, 1 Normal, 2 Hard, 3 Nightmare
+        int d = Settings != null ? Settings.difficulty : 0;
+
+        AchievementManager.Instance?.Unlock("5");          // Easy or higher (always)
+        if (d >= 1) AchievementManager.Instance?.Unlock("6");
+        if (d >= 2) AchievementManager.Instance?.Unlock("7");
+        if (d >= 3) AchievementManager.Instance?.Unlock("8");
+
+        if (d >= 3 && !tookDamageThisRun)
+            AchievementManager.Instance?.Unlock("9");
+
+        // Show victory UI
+        SetState(GameState.Victory);
+
+        // Optional music behavior: switch back to menu music
+        if (MusicManager.Instance)
+            MusicManager.Instance.PlayMenuMusic();
+    }
+
+    public void CloseVictoryAndReturnToMenu()
+    {
+        ReturnToMainMenu();
     }
 
     // ---------------- DIFFICULTY HANDLING ----------------
     public void HandleSettingsSaved()
     {
-        // Show popup if a difficulty change is pending
         if (Settings.difficultyPendingRestart)
         {
             ShowDifficultyRestartPopup();
@@ -196,13 +240,12 @@ public class GameManager : MonoBehaviour
         if (difficultyRestartPopup)
         {
             difficultyRestartPopup.SetActive(true);
-            Time.timeScale = 0f; // Pause the game while popup is active
+            Time.timeScale = 0f;
         }
     }
 
     public void ConfirmDifficultyRestart()
     {
-        // Commit difficulty
         PlayerPrefs.SetInt("Difficulty", Settings.difficulty);
         PlayerPrefs.Save();
 
@@ -212,41 +255,38 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         difficultyRestartPopup.SetActive(false);
 
-        // Send player to main menu after confirming
         ReturnToMainMenu();
     }
 
     public void CancelDifficultyRestart()
     {
-        // Revert difficulty change
         Settings.difficulty = Settings.previousDifficulty;
         Settings.difficultyPendingRestart = false;
 
         Time.timeScale = 1f;
         difficultyRestartPopup.SetActive(false);
 
-        // Refresh the dropdown in the settings menu, if it's open
         var menu = FindObjectOfType<SettingsMenu>();
         if (menu != null)
             menu.RefreshDifficultyDropdown();
     }
 
-    // ---------------- SAVE FROM MENU ----------------
     public void SaveSettingsFromMenu()
     {
-        // Save all non-difficulty settings
         Settings.Save();
 
-        // Check if difficulty changed and mark pending if so
         if (Settings.CheckDifficultyChanged())
         {
-            // Show popup
             HandleSettingsSaved();
         }
     }
 
     // ---------------- UI HELPERS ----------------
-
+    void SetPauseMenu(bool visible)
+    {
+        if (pauseMenu)
+            pauseMenu.SetActive(visible);
+    }
     public void OpenAchievementsMenu()
     {
         if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
@@ -258,23 +298,22 @@ public class GameManager : MonoBehaviour
         if (achievementsMenu)
             achievementsMenu.SetActive(true);
     }
-
     public void CloseAchievementsMenu()
     {
         if (achievementsMenu)
             achievementsMenu.SetActive(false);
     }
 
-    void SetPauseMenu(bool visible)
-    {
-        if (pauseMenu)
-            pauseMenu.SetActive(visible);
-    }
-
     void SetDeathScreen(bool visible)
     {
         if (deathScreen)
             deathScreen.SetActive(visible);
+    }
+
+    void SetVictoryScreen(bool visible)
+    {
+        if (victoryScreen)
+            victoryScreen.SetActive(visible);
     }
 
     public void OpenLoginMenu()

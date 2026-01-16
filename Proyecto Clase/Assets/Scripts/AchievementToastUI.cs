@@ -36,9 +36,9 @@ public class AchievementToastUI : MonoBehaviour
         {
             backgroundImage.color = rarity switch
             {
-                "rare" => rareBg,
-                "epic" => epicBg,
-                "legendary" => legendaryBg,
+                "uncommon" => rareBg,
+                "rare" => epicBg,
+                "ultrarare" => legendaryBg,
                 _ => commonBg
             };
         }
@@ -46,11 +46,22 @@ public class AchievementToastUI : MonoBehaviour
         if (iconImage)
         {
             string key = string.IsNullOrEmpty(dto.icon_key) ? dto.id : dto.icon_key;
-            Sprite s = AchievementIconLibrary.Instance ? AchievementIconLibrary.Instance.GetIcon(key) : null;
+            Sprite s = AchievementIconLibrary.Instance
+                ? AchievementIconLibrary.Instance.GetIcon(key)
+                : null;
 
-            iconImage.enabled = (s != null);
-            iconImage.sprite = s;
+            if (s == null)
+            {
+                iconImage.enabled = false;
+                Debug.LogWarning($"[AchievementToastUI] No icon found for key '{key}'");
+            }
+            else
+            {
+                iconImage.enabled = true;
+                iconImage.sprite = s;
+            }
         }
+
 
         if (animator && !string.IsNullOrEmpty(showTrigger))
             animator.SetTrigger(showTrigger);

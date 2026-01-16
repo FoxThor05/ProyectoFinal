@@ -13,7 +13,7 @@ public class AchievementIconLibrary : MonoBehaviour
         public Sprite icon;
     }
 
-    [SerializeField] private List<Entry> entries = new();
+    [SerializeField] private List<Entry> entries = new List<Entry>();
 
     private Dictionary<string, Sprite> map;
 
@@ -28,17 +28,34 @@ public class AchievementIconLibrary : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
+        BuildMap();
+    }
+
+    void OnValidate()
+    {
+        // Keep dictionary in sync while editing (and also while playing).
+        if (Instance == null || Instance == this)
+            BuildMap();
+    }
+
+    void BuildMap()
+    {
         map = new Dictionary<string, Sprite>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var e in entries)
         {
-            if (e == null || string.IsNullOrEmpty(e.iconKey) || e.icon == null) continue;
-            map[e.iconKey] = e.icon;
+            if (e == null) continue;
+            if (string.IsNullOrWhiteSpace(e.iconKey)) continue;
+
+            map[e.iconKey.Trim()] = e.icon; // icon can be null until you assign it
         }
     }
 
     public Sprite GetIcon(string iconKey)
     {
-        if (string.IsNullOrEmpty(iconKey) || map == null) return null;
-        return map.TryGetValue(iconKey, out var s) ? s : null;
+        if (string.IsNullOrWhiteSpace(iconKey) || map == null)
+            return null;
+
+        return map.TryGetValue(iconKey.Trim(), out var s) ? s : null;
     }
 }

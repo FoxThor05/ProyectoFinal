@@ -16,14 +16,14 @@ public class AchievementItemUI : MonoBehaviour
 
     [Header("Text Colors")]
     public Color commonText = Color.white;
-    public Color rareText = Color.cyan;
-    public Color epicText = new Color(0.7f, 0.4f, 1f);
+    public Color uncommonText = Color.cyan;
+    public Color rareText = new Color(0.7f, 0.4f, 1f);
     public Color legendaryText = new Color(1f, 0.75f, 0.2f);
 
     [Header("Panel Colors")]
     public Color commonBg = new Color(0.2f, 0.2f, 0.2f);
-    public Color rareBg = new Color(0.15f, 0.25f, 0.3f);
-    public Color epicBg = new Color(0.25f, 0.15f, 0.35f);
+    public Color uncommonBg = new Color(0.15f, 0.25f, 0.3f);
+    public Color rareBg = new Color(0.25f, 0.15f, 0.35f);
     public Color legendaryBg = new Color(0.35f, 0.25f, 0.1f);
 
     public void Setup(AchievementDTO data, bool unlocked)
@@ -50,9 +50,17 @@ public class AchievementItemUI : MonoBehaviour
             ? AchievementIconLibrary.Instance.GetIcon(key)
             : null;
 
-        iconImage.enabled = (icon != null);
+        if (icon == null)
+        {
+            iconImage.enabled = false;
+            Debug.LogWarning($"[AchievementItemUI] No icon found for key '{key}'");
+            return;
+        }
+
+        iconImage.enabled = true;
         iconImage.sprite = icon;
     }
+
 
     void ApplyRarityVisuals(string rarity)
     {
@@ -63,17 +71,17 @@ public class AchievementItemUI : MonoBehaviour
 
         switch (rarity)
         {
+            case "uncommon":
+                bg = uncommonBg;
+                text = uncommonText;
+                break;
+
             case "rare":
                 bg = rareBg;
                 text = rareText;
                 break;
 
-            case "epic":
-                bg = epicBg;
-                text = epicText;
-                break;
-
-            case "legendary":
+            case "ultrarare":
                 bg = legendaryBg;
                 text = legendaryText;
                 break;

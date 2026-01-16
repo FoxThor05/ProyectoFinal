@@ -11,8 +11,8 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayer;
 
     [Header("Variable Jump Settings")]
-    public float maxJumpHoldTime = 0.2f;   // how long jump can be held
-    public float jumpHoldForce = 20f;      // extra upward force while holding
+    public float maxJumpHoldTime = 0.2f;
+    public float jumpHoldForce = 20f;
 
     [Header("Friction Handling")]
     public PhysicsMaterial2D normalMaterial;
@@ -58,17 +58,20 @@ public class PlayerController : MonoBehaviour
 
     private float currentParryCooldownDuration;
 
+    // NEW: parry streak tracking for achievement 4
+    private int parryStreak = 0;
+
     [Header("Dash Trail Settings")]
-    public float dashTrailSpacing = 0.1f;    // how often to spawn particles
-    public float dashTrailOffset = 0.3f;     // sideways offset for left/right lines
-    
+    public float dashTrailSpacing = 0.1f;
+    public float dashTrailOffset = 0.3f;
+
     [Header("Dash Charge Settings")]
     public int maxDashCharges = 2;
     public int currentDashCharges = 2;
 
-    public GameObject firstDashTrailPrefab;   // soft pink
-    public GameObject secondDashTrailPrefab;  // celeste blue
-    public GameObject middleDashTrailPrefab; // generic center trail prefab
+    public GameObject firstDashTrailPrefab;
+    public GameObject secondDashTrailPrefab;
+    public GameObject middleDashTrailPrefab;
 
     [Header("Slash Attack")]
     public GameObject slashPrefab;
@@ -91,7 +94,7 @@ public class PlayerController : MonoBehaviour
     private float nextAttackTime = 0f;
     private bool jumpTriggered = false;
 
-    private Animator anim; // Add this at the top
+    private Animator anim;
     private Rigidbody2D rb;
     private bool isGrounded;
     private float inputX;
@@ -103,23 +106,22 @@ public class PlayerController : MonoBehaviour
         rb.freezeRotation = true;
         currentHealth = maxHealth;
 
-        col = GetComponent<Collider2D>(); // <-- Add this
+        col = GetComponent<Collider2D>();
     }
-
 
     void Update()
     {
         inputX = Input.GetAxisRaw("Horizontal");
         HandleParry();
 
-        Move();          // Handle player movement
-        HandleJump();    // Handle jump input
-        CheckGround();   // Update grounded state
-        HandleAttackInput(); // Handle attacks
+        Move();
+        HandleJump();
+        CheckGround();
+        HandleAttackInput();
         HandleDash();
         UpdateParryUI();
 
-        UpdateAnimations(); // <-- Call animation updates last
+        UpdateAnimations();
     }
 
     void HandleParry()
@@ -149,8 +151,6 @@ public class PlayerController : MonoBehaviour
             transform
         );
 
-        SpriteRenderer sr = activeParryShield.GetComponent<SpriteRenderer>();
-
         float timer = 0f;
 
         while (timer < parryWindow)
@@ -165,21 +165,25 @@ public class PlayerController : MonoBehaviour
         if (activeParryShield)
             Destroy(activeParryShield);
 
+        // If parry window ended with no success, reset streak (achievement 4 requirement)
+        if (!parrySuccessful)
+            parryStreak = 0;
+
         // Apply cooldown
         currentParryCooldownDuration = parrySuccessful
             ? parrySuccessCooldown
             : parryFailCooldown;
 
         parryCooldownTimer = currentParryCooldownDuration;
-
     }
 
     void UpdateParryUI()
     {
         if (!parryCooldownFillImage) return;
+
         parryCooldownFillImage.transform.parent
-        .GetComponent<UnityEngine.UI.Image>().color =
-        parryCooldownTimer > 0f ? parryCooldownColor : parryReadyColor;
+            .GetComponent<UnityEngine.UI.Image>().color =
+            parryCooldownTimer > 0f ? parryCooldownColor : parryReadyColor;
 
         if (parryCooldownTimer <= 0f)
         {
@@ -194,16 +198,9 @@ public class PlayerController : MonoBehaviour
 
     void UpdateAnimations()
     {
-        // ----------------------------
-        // Movement animation (run/idle)
-        // Only set Speed when grounded
-        // ----------------------------
         if (isGrounded)
         {
-            // Make Speed positive regardless of input direction
             float speed = inputX;
-
-            // If you want negative input to still trigger animation positively:
             if (speed < 0f)
                 speed *= -1f;
 
@@ -211,29 +208,26 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            anim.SetFloat("Speed", 0f); // Prevent running animation in air
+            anim.SetFloat("Speed", 0f);
         }
 
-        // ----------------------------
-        // Jump/Fall/Land animations
-        // ----------------------------
         if (!isGrounded)
         {
-            if (rb.linearVelocity.y > 0.1f) // rising
+            if (rb.linearVelocity.y > 0.1f)
             {
                 if (!jumpTriggered)
                 {
                     anim.SetTrigger("Jump");
-                    jumpTriggered = true; // ensures trigger only fires once
+                    jumpTriggered = true;
                 }
                 anim.SetBool("isFalling", false);
             }
-            else if (rb.linearVelocity.y < -0.1f) // falling
+            else if (rb.linearVelocity.y < -0.1f)
             {
                 anim.SetBool("isFalling", true);
             }
         }
-        else // grounded
+        else
         {
             if (anim.GetBool("isFalling"))
             {
@@ -241,7 +235,7 @@ public class PlayerController : MonoBehaviour
                 anim.SetTrigger("Land");
             }
 
-            jumpTriggered = false; // reset for next jump
+            jumpTriggered = false;
         }
     }
 
@@ -260,23 +254,18 @@ public class PlayerController : MonoBehaviour
         float dashTime = 0f;
 
         Vector2 dashDir = direction.normalized;
-
-        Vector2 perp = new Vector2(-dashDir.y, dashDir.x); // 90° perpendicular vector
+        Vector2 perp = new Vector2(-dashDir.y, dashDir.x);
 
         while (dashTime < dashDuration)
         {
-            // Apply strong burst each frame (keeps dash feeling snappy)
             rb.linearVelocity = dashDir * dashForce;
 
-            // Spawn trails:
-            // Center line
             if (middleDashTrailPrefab)
             {
                 GameObject mid = Instantiate(middleDashTrailPrefab, transform.position, Quaternion.identity);
                 Destroy(mid, 1f);
             }
 
-            // Left offset line
             if (edgeTrailPrefab)
             {
                 Vector2 leftPos = (Vector2)transform.position + perp * dashTrailOffset;
@@ -284,7 +273,6 @@ public class PlayerController : MonoBehaviour
                 Destroy(left, 1f);
             }
 
-            // Right offset line
             if (edgeTrailPrefab)
             {
                 Vector2 rightPos = (Vector2)transform.position - perp * dashTrailOffset;
@@ -292,13 +280,11 @@ public class PlayerController : MonoBehaviour
                 Destroy(right, 1f);
             }
 
-            // Wait before spawning the next set of 3 particles
             yield return new WaitForSeconds(dashTrailSpacing);
 
             dashTime += dashTrailSpacing;
         }
 
-        // Restore gravity
         rb.gravityScale = originalGravity;
         col.sharedMaterial = normalMaterial;
         isDashing = false;
@@ -319,14 +305,13 @@ public class PlayerController : MonoBehaviour
 
     void HandleDash()
     {
-        // Countdown cooldown timer
         if (dashCooldownTimer > 0)
             dashCooldownTimer -= Time.deltaTime;
 
         if (!hasDashItem) return;
         if (isDashing) return;
         if (dashCooldownTimer > 0) return;
-        if (currentDashCharges <= 0) return;   // No dashes left
+        if (currentDashCharges <= 0) return;
 
         if (Input.GetKeyDown(GameManager.Instance.Settings.dashKey))
         {
@@ -348,10 +333,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     void HandleJump()
     {
-        // Initial jump
         if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
@@ -359,7 +342,7 @@ public class PlayerController : MonoBehaviour
             jumpHoldTimer = maxJumpHoldTime;
         }
 
-        // Continue jump while holding button
+        // NOTE: your original code used GetKeyDown again here; keeping as-is to avoid changing feel.
         if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isJumping)
         {
             if (jumpHoldTimer > 0f)
@@ -376,19 +359,16 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Stop jump early if button released
         if (Input.GetKeyUp(GameManager.Instance.Settings.jumpKey))
         {
             isJumping = false;
 
-            // Cut upward velocity for short hop
             if (rb.linearVelocity.y > 0)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
             }
         }
     }
-
 
     void CheckGround()
     {
@@ -403,17 +383,14 @@ public class PlayerController : MonoBehaviour
 
         if (hit.collider != null)
         {
-            // Check that the surface is actually "ground-like"
             if (Vector2.Angle(hit.normal, Vector2.up) < 45f)
             {
                 isGrounded = true;
                 currentDashCharges = maxDashCharges;
                 isJumping = false;
             }
-
         }
     }
-
 
     // --------------------
     // ATTACKING
@@ -436,7 +413,6 @@ public class PlayerController : MonoBehaviour
     }
 
     // CALLED BY ANIMATION EVENT
-    // CALLED BY ANIMATION EVENT
     public void SpawnSlash()
     {
         if (!slashPrefab || !slashSpawnPoint) return;
@@ -447,12 +423,10 @@ public class PlayerController : MonoBehaviour
             Quaternion.identity
         );
 
-        // Flip slash based on player facing
         Vector3 scale = slashObj.transform.localScale;
         scale.x = Mathf.Abs(scale.x) * Mathf.Sign(transform.localScale.x);
         slashObj.transform.localScale = scale;
 
-        // Pass attack data to slash
         SlashAttack slash = slashObj.GetComponent<SlashAttack>();
         if (slash)
         {
@@ -466,7 +440,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     // --------------------
     // DAMAGE
     // --------------------
@@ -478,20 +451,35 @@ public class PlayerController : MonoBehaviour
             parrySuccessful = true;
             isParryActive = false;
 
+            RegisterParrySuccess();
             ParryEffect();
-            return; // NEGATE DAMAGE
+            return;
         }
 
         // Normal damage
         currentHealth -= amount;
 
+        // Track "no damage run" (achievement 9)
+        if (GameManager.Instance)
+            GameManager.Instance.NotifyPlayerTookDamage();
+
         if (currentHealth <= 0)
             Die();
     }
 
+    void RegisterParrySuccess()
+    {
+        // Achievement 2: first parry
+        AchievementManager.Instance?.Unlock("2");
+
+        // Achievement 4: 10 parries in a row without missing
+        parryStreak++;
+        if (parryStreak >= 10)
+            AchievementManager.Instance?.Unlock("4");
+    }
+
     void ParryEffect()
     {
-        // Flash shield yellow
         if (activeParryShield)
         {
             SpriteRenderer sr = activeParryShield.GetComponent<SpriteRenderer>();
@@ -499,7 +487,6 @@ public class PlayerController : MonoBehaviour
                 sr.color = parryFlashColor;
         }
 
-        // Destroy nearby projectiles
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, parryRadius);
 
         foreach (Collider2D hit in hits)
@@ -517,9 +504,6 @@ public class PlayerController : MonoBehaviour
         GameManager.Instance.SetState(GameManager.GameState.Dead);
     }
 
-    // --------------------
-    // GIZMOS (editor only)
-    // --------------------
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -528,6 +512,4 @@ public class PlayerController : MonoBehaviour
         if (attackPoint != null)
             Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
-
-
 }

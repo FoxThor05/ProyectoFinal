@@ -6,12 +6,13 @@ public class BossAI : MonoBehaviour, IDamageable
 {
     public enum BossAttack
     {
-        CrossSpin,      // Attack 1
-        CircleWave,     // Attack 2
-        RandomCircle,   // Attack 3
-        HomingShots,    // Attack 4
-        DualAttack      // Attack 5
+        CrossSpin,
+        CircleWave,
+        RandomCircle,
+        HomingShots,
+        DualAttack
     }
+
     [Header("Difficulty")]
     [SerializeField] private Difficulty difficultyOverride = Difficulty.Normal;
     [SerializeField] private bool useGameSettingsDifficulty = true;
@@ -41,6 +42,7 @@ public class BossAI : MonoBehaviour, IDamageable
     [Header("References")]
     public Transform firePoint;
     public Transform player;
+
     public enum Difficulty
     {
         Easy = 0,
@@ -54,6 +56,7 @@ public class BossAI : MonoBehaviour, IDamageable
     private bool isAttacking = false;
     private bool phase50Triggered = false;
     private bool phase25Triggered = false;
+
     [System.Serializable]
     public class BossDifficultyTuning
     {
@@ -76,11 +79,13 @@ public class BossAI : MonoBehaviour, IDamageable
         public int homingShotsNormal = 2;
         public int homingShotsLowHP = 3;
     }
+
     [Header("Difficulty Presets")]
     public BossDifficultyTuning easy;
     public BossDifficultyTuning normal;
     public BossDifficultyTuning hard;
     public BossDifficultyTuning nightmare;
+
     Difficulty CurrentDifficulty =>
         useGameSettingsDifficulty && GameManager.Instance
             ? (Difficulty)GameManager.Instance.Settings.difficulty
@@ -122,6 +127,7 @@ public class BossAI : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+
         if (!phase50Triggered && currentHealth <= maxHealth * 0.5f)
         {
             phase50Triggered = true;
@@ -141,20 +147,27 @@ public class BossAI : MonoBehaviour, IDamageable
     // CALLED BY DEFEAT ANIMATION EVENT
     public void DestroyBoss()
     {
+        // Achievement 1: "First Steps" (first kill). Boss counts as a kill too.
         AchievementManager.Instance.Unlock("1");
-        Destroy(gameObject);
 
+        // Hide boss bar immediately
+        if (bossHealthBar)
+            bossHealthBar.Hide();
+
+        // Trigger victory flow
+        if (GameManager.Instance)
+            GameManager.Instance.OnBossDefeated();
+
+        Destroy(gameObject);
     }
 
     // ---------------- MAIN LOOP ----------------
-
     IEnumerator BossLoop()
     {
-        yield return new WaitForSeconds(1f); // small intro delay
+        yield return new WaitForSeconds(1f);
 
         while (currentHealth > 0)
         {
-            // Wait until player enters arena
             while (!IsPlayerInArena())
             {
                 if (playerInArena)
@@ -172,7 +185,6 @@ public class BossAI : MonoBehaviour, IDamageable
                 yield return null;
             }
 
-            // Player just entered arena
             if (!playerInArena)
             {
                 playerInArena = true;
@@ -191,7 +203,6 @@ public class BossAI : MonoBehaviour, IDamageable
                 ? lowHpCooldown
                 : attackCooldown;
 
-            // Wait, but abort if player leaves
             float t = 0f;
             while (t < wait)
             {
@@ -240,11 +251,11 @@ public class BossAI : MonoBehaviour, IDamageable
     BossAttack GetRandomAttack()
     {
         List<BossAttack> pool = new List<BossAttack>
-    {
-        BossAttack.CrossSpin,
-        BossAttack.CircleWave,
-        BossAttack.RandomCircle
-    };
+        {
+            BossAttack.CrossSpin,
+            BossAttack.CircleWave,
+            BossAttack.RandomCircle
+        };
 
         if (currentHealth <= maxHealth * 0.5f)
             pool.Add(BossAttack.HomingShots);
@@ -284,7 +295,6 @@ public class BossAI : MonoBehaviour, IDamageable
             FireAtAngle(180 + o, speed);
             FireAtAngle(270 + o, speed);
 
-            // Nightmare under 25% HP = add rotated set
             if (CurrentDifficulty == Difficulty.Nightmare &&
                 currentHealth <= maxHealth * 0.25f)
             {
@@ -318,7 +328,6 @@ public class BossAI : MonoBehaviour, IDamageable
 
         float baseOffset = 0f;
         List<BoomerangProjectile> spawnedBooms = new List<BoomerangProjectile>();
-        bool attackEnded = false;
 
         for (int w = 0; w < waves; w++)
         {
@@ -366,9 +375,6 @@ public class BossAI : MonoBehaviour, IDamageable
             yield return new WaitForSeconds(delay);
         }
 
-        // ----------------
-        // Nightmare: end attack as soon as any boomerang starts returning
-        // ----------------
         if (CurrentDifficulty == Difficulty.Nightmare && spawnedBooms.Count > 0)
         {
             yield return new WaitUntil(() => spawnedBooms.Exists(b => b.startedReturn));
@@ -394,7 +400,6 @@ public class BossAI : MonoBehaviour, IDamageable
             proj.transform.right = d;
             yield return new WaitForSeconds(0.25f);
         }
-
     }
 
     IEnumerator Attack_Dual()
@@ -448,11 +453,10 @@ public class BossAI : MonoBehaviour, IDamageable
         if (rb)
             rb.linearVelocity = dir.normalized * speed;
     }
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, activationRadius);
     }
 }
-
-

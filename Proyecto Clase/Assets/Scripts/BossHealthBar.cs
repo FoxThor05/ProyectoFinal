@@ -11,12 +11,19 @@ public class BossHealthBar : MonoBehaviour
 
     void Start()
     {
-        gameObject.SetActive(false); // hidden by default
+        gameObject.SetActive(false);
     }
 
     void Update()
     {
-        if (!boss) return;
+        if (!boss)
+            return;
+
+        if (boss.currentHealth <= 0)
+        {
+            Hide();
+            return;
+        }
 
         float hpPercent = (float)boss.currentHealth / boss.maxHealth;
         fillImage.fillAmount = hpPercent;

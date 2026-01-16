@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SlashAttack : MonoBehaviour
@@ -12,9 +13,12 @@ public class SlashAttack : MonoBehaviour
     private GameObject normalPopup;
     private GameObject critPopup;
 
-    private bool hasHit = false;
+    // Track unique targets hit by this slash instance
+    private readonly HashSet<IDamageable> hitTargets = new HashSet<IDamageable>();
 
-    // Called by Player when spawned
+    // Combo achievement (id "3") should trigger once per slash
+    private bool comboTriggered = false;
+
     public void Initialize(
         int damage,
         float critChance,
@@ -32,12 +36,13 @@ public class SlashAttack : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Prevent multi-hitting the same enemy
-        if (hasHit) return;
-
         IDamageable damageable = other.GetComponent<IDamageable>();
         if (damageable == null) return;
-        Debug.Log("Slash hit: " + other.name);
+
+        // Prevent multi-hitting the same enemy with the same slash
+        if (hitTargets.Contains(damageable)) return;
+
+        hitTargets.Add(damageable);
 
         bool isCrit = Random.value < critChance;
         int damage = isCrit ? critDamage : baseDamage;
@@ -57,7 +62,12 @@ public class SlashAttack : MonoBehaviour
             Instantiate(popup, other.transform.position + offset, Quaternion.identity);
         }
 
-        hasHit = true;
+        // Combo achievement: hit 2 enemies with one attack (slash instance)
+        if (!comboTriggered && hitTargets.Count >= 2)
+        {
+            comboTriggered = true;
+            AchievementManager.Instance?.Unlock("3");
+        }
     }
 
     // CALLED BY ANIMATION EVENT (last frame)
