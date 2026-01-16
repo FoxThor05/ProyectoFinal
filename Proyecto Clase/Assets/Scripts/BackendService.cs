@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 
 public class BackendService : MonoBehaviour
@@ -17,6 +16,22 @@ public class BackendService : MonoBehaviour
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(accessToken);
 
+    // ---------------- DTOs ----------------
+
+
+    [System.Serializable]
+    public class AchievementListWrapper
+    {
+        public AchievementDTO[] items;
+    }
+
+    [System.Serializable]
+    public class UserAchievementWrapper
+    {
+        public UserAchievementDTO[] items;
+    }
+
+    // ---------------- AUTH ----------------
     [System.Serializable]
     public class AuthUser
     {
@@ -30,24 +45,6 @@ public class BackendService : MonoBehaviour
         public string access_token;
         public string refresh_token;
         public AuthUser user;
-    }
-
-    [System.Serializable]
-    class AchievementListWrapper
-    {
-        public AchievementDTO[] items;
-    }
-
-    [System.Serializable]
-    class UserAchievementDTO
-    {
-        public string achievement_id;
-    }
-
-    [System.Serializable]
-    class UserAchievementWrapper
-    {
-        public UserAchievementDTO[] items;
     }
 
     void Awake()
@@ -103,7 +100,6 @@ public class BackendService : MonoBehaviour
         };
 
         UserManager.Instance.SetUser(profile);
-
         PlayerPrefs.SetString("refresh_token", refreshToken);
 
         callback(true, null);
@@ -113,25 +109,6 @@ public class BackendService : MonoBehaviour
     public void Register(string username, string password, System.Action<bool, string> callback)
     {
         StartCoroutine(RegisterRoutine(username, password, callback));
-    }
-
-    IEnumerator InsertProfileRoutine(string username)
-    {
-        string json = $"{{ \"id\": \"{userId}\", \"username\": \"{username}\" }}";
-
-        var req = new UnityWebRequest($"{supabaseUrl}/rest/v1/profiles", "POST");
-        byte[] body = Encoding.UTF8.GetBytes(json);
-        req.uploadHandler = new UploadHandlerRaw(body);
-        req.downloadHandler = new DownloadHandlerBuffer();
-
-        req.SetRequestHeader("apikey", apiKey);
-        req.SetRequestHeader("Authorization", "Bearer " + accessToken);
-        req.SetRequestHeader("Content-Type", "application/json");
-
-        yield return req.SendWebRequest();
-
-        if (req.result != UnityWebRequest.Result.Success)
-            Debug.LogWarning("Profile insert failed: " + req.downloadHandler.text);
     }
 
     IEnumerator RegisterRoutine(string username, string password, System.Action<bool, string> callback)
@@ -155,6 +132,7 @@ public class BackendService : MonoBehaviour
         }
 
         var response = JsonUtility.FromJson<AuthResponse>(req.downloadHandler.text);
+
         StartCoroutine(InsertProfileRoutine(username));
 
         var profile = new UserProfile
@@ -169,6 +147,24 @@ public class BackendService : MonoBehaviour
         PlayerPrefs.SetString("refresh_token", response.refresh_token);
 
         callback(true, null);
+    }
+
+    IEnumerator InsertProfileRoutine(string username)
+    {
+        string json = $"{{ \"id\": \"{userId}\", \"username\": \"{username}\" }}";
+
+        var req = new UnityWebRequest($"{supabaseUrl}/rest/v1/profiles", "POST");
+        req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+        req.downloadHandler = new DownloadHandlerBuffer();
+
+        req.SetRequestHeader("apikey", apiKey);
+        req.SetRequestHeader("Authorization", "Bearer " + accessToken);
+        req.SetRequestHeader("Content-Type", "application/json");
+
+        yield return req.SendWebRequest();
+
+        if (req.result != UnityWebRequest.Result.Success)
+            Debug.LogWarning("Profile insert failed: " + req.downloadHandler.text);
     }
 
     // ---------------- LOGOUT ----------------
@@ -221,10 +217,13 @@ public class BackendService : MonoBehaviour
     IEnumerator FetchAllAchievementsRoutine(System.Action<AchievementDTO[]> callback)
     {
         var req = UnityWebRequest.Get(
-            $"{supabaseUrl}/rest/v1/achievements?select=id,name,description"
+            $"{supabaseUrl}/rest/v1/achievements?select=id,name,description,rarity"
         );
 
         req.SetRequestHeader("apikey", apiKey);
+        req.SetRequestHeader("Accept", "application/json");
+        if (IsLoggedIn)
+            req.SetRequestHeader("Authorization", "Bearer " + accessToken);
 
         yield return req.SendWebRequest();
 
@@ -235,25 +234,24 @@ public class BackendService : MonoBehaviour
             yield break;
         }
 
-        // JsonUtility cannot parse arrays directly
         string wrapped = $"{{\"items\":{req.downloadHandler.text}}}";
         var data = JsonUtility.FromJson<AchievementListWrapper>(wrapped);
 
-        callback?.Invoke(data.items);
+        callback?.Invoke(data?.items ?? new AchievementDTO[0]);
     }
 
-    public void FetchUnlockedAchievements(System.Action<HashSet<string>> callback)
+    public void FetchUnlockedAchievements(System.Action<string[]> callback)
     {
         if (!IsLoggedIn)
         {
-            callback?.Invoke(new HashSet<string>());
+            callback?.Invoke(new string[0]);
             return;
         }
 
         StartCoroutine(FetchUnlockedAchievementsRoutine(callback));
     }
 
-    IEnumerator FetchUnlockedAchievementsRoutine(System.Action<HashSet<string>> callback)
+    IEnumerator FetchUnlockedAchievementsRoutine(System.Action<string[]> callback)
     {
         var req = UnityWebRequest.Get(
             $"{supabaseUrl}/rest/v1/user_achievements?select=achievement_id"
@@ -261,24 +259,25 @@ public class BackendService : MonoBehaviour
 
         req.SetRequestHeader("apikey", apiKey);
         req.SetRequestHeader("Authorization", "Bearer " + accessToken);
+        req.SetRequestHeader("Accept", "application/json");
 
         yield return req.SendWebRequest();
 
         if (req.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Fetch user achievements failed: " + req.downloadHandler.text);
-            callback?.Invoke(new HashSet<string>());
+            callback?.Invoke(new string[0]);
             yield break;
         }
 
         string wrapped = $"{{\"items\":{req.downloadHandler.text}}}";
         var data = JsonUtility.FromJson<UserAchievementWrapper>(wrapped);
 
-        HashSet<string> unlocked = new();
-        foreach (var a in data.items)
-            unlocked.Add(a.achievement_id);
+        string[] unlockedIds = new string[data.items.Length];
+        for (int i = 0; i < data.items.Length; i++)
+            unlockedIds[i] = data.items[i].achievement_id;
 
-        callback?.Invoke(unlocked);
+        callback?.Invoke(unlockedIds);
     }
 
     // ---------------- GUEST LOGIN ----------------

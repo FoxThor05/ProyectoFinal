@@ -22,8 +22,8 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField] private TMP_Text jumpKeyText;
 
     private Resolution[] resolutions;
-
     private bool waitingForKey;
+
     private GameSettings.BindAction currentBind;
     private TMP_Text currentBindText;
 
@@ -40,7 +40,6 @@ public class SettingsMenu : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Cancel rebind
             waitingForKey = false;
             UpdateKeyTexts();
             return;
@@ -82,7 +81,6 @@ public class SettingsMenu : MonoBehaviour
 
         UpdateKeyTexts();
 
-        // Apply the saved display/audio settings live
         Screen.fullScreen = s.fullscreen;
         Resolution r = resolutions[s.resolutionIndex];
         Screen.SetResolution(r.width, r.height, s.fullscreen);
@@ -113,14 +111,8 @@ public class SettingsMenu : MonoBehaviour
     void HandleKeyRebind(KeyCode key)
     {
         waitingForKey = false;
-
-        bool success = GameManager.Instance.Settings.TryRebind(currentBind, key);
+        GameManager.Instance.Settings.TryRebind(currentBind, key);
         UpdateKeyTexts();
-
-        if (!success)
-        {
-            Debug.Log("Key already bound or invalid. Rebind cancelled.");
-        }
     }
 
     public void RebindFire1() => BeginRebind(GameSettings.BindAction.Fire1, fire1KeyText);
@@ -131,37 +123,44 @@ public class SettingsMenu : MonoBehaviour
     // ---------------- UI CALLBACKS ----------------
     public void OnMusicVolumeChanged()
     {
-        float value = musicSlider.value;
-        GameManager.Instance.Settings.ApplyMusicVolume(value);
+        GameManager.Instance.Settings.ApplyMusicVolume(musicSlider.value);
     }
 
     public void OnDifficultyChanged()
     {
         int value = difficultyDropdown.value;
         GameManager.Instance.Settings.ApplyDifficulty(value);
+
+        // Do NOT show popup here
+        // Popup will appear only on Save
     }
+
 
     public void OnFullscreenToggled()
     {
-        bool value = fullscreenToggle.isOn;
-        GameManager.Instance.Settings.ApplyFullscreen(value);
+        GameManager.Instance.Settings.ApplyFullscreen(fullscreenToggle.isOn);
     }
 
     public void OnResolutionChanged()
     {
-        int index = resolutionDropdown.value;
-        GameManager.Instance.Settings.ApplyResolution(index, resolutions);
+        GameManager.Instance.Settings.ApplyResolution(
+            resolutionDropdown.value, resolutions);
     }
 
     // ---------------- SAVE / CANCEL ----------------
     public void SaveSettings()
     {
-        GameManager.Instance.Settings.Save();
+        GameManager.Instance.SaveSettingsFromMenu();
+    }
+
+    public void RefreshDifficultyDropdown()
+    {
+        difficultyDropdown.SetValueWithoutNotify(
+            GameManager.Instance.Settings.difficulty);
     }
 
     public void Back()
     {
-        // Reload saved settings from disk to undo unsaved changes
         GameManager.Instance.Settings.LoadSettingsFromPlayerPrefs();
         LoadUIFromSettings();
         gameObject.SetActive(false);

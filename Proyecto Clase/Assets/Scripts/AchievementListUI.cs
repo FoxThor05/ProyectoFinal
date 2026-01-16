@@ -14,7 +14,7 @@ public class AchievementListUI : MonoBehaviour
     {
         BackendService.Instance.FetchAllAchievements(allAchievements =>
         {
-            BackendService.Instance.FetchUserAchievements(unlockedIds =>
+            BackendService.Instance.FetchUnlockedAchievements(unlockedIds =>
             {
                 AchievementManager.Instance.SetUnlockedAchievements(unlockedIds);
                 Populate(allAchievements);

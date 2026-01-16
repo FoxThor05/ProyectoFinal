@@ -9,6 +9,8 @@ public class GameSettings
 
     // ---------------- GAMEPLAY ----------------
     public int difficulty = 0; // 0 = Easy, 1 = Normal, 2 = Hard, 3 = Nightmare
+    [NonSerialized] public int previousDifficulty;
+    [NonSerialized] public bool difficultyPendingRestart;
 
     // ---------------- DISPLAY ----------------
     public bool fullscreen = true;
@@ -33,7 +35,18 @@ public class GameSettings
     public void ApplyDifficulty(int value)
     {
         difficulty = Mathf.Clamp(value, 0, 3);
+        // Remove difficultyPendingRestart from here
     }
+    public bool CheckDifficultyChanged()
+    {
+        if (difficulty != previousDifficulty)
+        {
+            difficultyPendingRestart = true;
+            return true;
+        }
+        return false;
+    }
+
 
     public void ApplyFullscreen(bool value)
     {
@@ -50,13 +63,20 @@ public class GameSettings
         Screen.SetResolution(r.width, r.height, fullscreen);
     }
 
-    // ---------------- KEYBIND HANDLING ----------------
+    // ---------------- DIFFICULTY COMMIT ----------------
+    public void CommitDifficulty()
+    {
+        PlayerPrefs.SetInt("Difficulty", difficulty);
+        PlayerPrefs.Save();
+
+        previousDifficulty = difficulty;
+        difficultyPendingRestart = false;
+    }
+
+    // ---------------- KEYBINDS ----------------
     public bool TryRebind(BindAction action, KeyCode newKey)
     {
-        // Escape cancels
         if (newKey == KeyCode.Escape) return false;
-
-        // Prevent duplicate binds
         if (IsKeyAlreadyBound(newKey)) return false;
 
         switch (action)
@@ -70,16 +90,16 @@ public class GameSettings
         return true;
     }
 
-    private bool IsKeyAlreadyBound(KeyCode key)
+    bool IsKeyAlreadyBound(KeyCode key)
     {
-        return fire1Key == key || fire2Key == key || dashKey == key || jumpKey == key;
+        return fire1Key == key || fire2Key == key ||
+               dashKey == key || jumpKey == key;
     }
 
     // ---------------- SAVE / LOAD ----------------
     public void Save()
     {
         PlayerPrefs.SetFloat("MusicVolume", musicVolume);
-        PlayerPrefs.SetInt("Difficulty", difficulty);
         PlayerPrefs.SetInt("Fullscreen", fullscreen ? 1 : 0);
         PlayerPrefs.SetInt("ResolutionIndex", resolutionIndex);
 
@@ -95,6 +115,9 @@ public class GameSettings
     {
         musicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         difficulty = PlayerPrefs.GetInt("Difficulty", 0);
+        previousDifficulty = difficulty;
+        difficultyPendingRestart = false;
+
         fullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
         resolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", 0);
 
@@ -107,7 +130,7 @@ public class GameSettings
     public static GameSettings Load()
     {
         var s = new GameSettings();
-        s.LoadSettingsFromPlayerPrefs(); // rename instance Load method to avoid name clash
+        s.LoadSettingsFromPlayerPrefs();
         return s;
     }
 }

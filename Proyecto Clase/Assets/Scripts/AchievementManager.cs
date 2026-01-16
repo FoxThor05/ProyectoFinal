@@ -5,7 +5,7 @@ public class AchievementManager : MonoBehaviour
 {
     public static AchievementManager Instance { get; private set; }
 
-    private HashSet<string> unlockedAchievements = new();
+    private List<string> unlockedAchievements = new();
 
     void Awake()
     {
@@ -19,23 +19,22 @@ public class AchievementManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public bool IsUnlocked(string achievementId)
+    public void SetUnlockedAchievements(IEnumerable<string> ids)
     {
-        return unlockedAchievements.Contains(achievementId);
+        unlockedAchievements.Clear();
+        unlockedAchievements.AddRange(ids);
     }
 
-    public void Unlock(string achievementId)
+    public bool IsUnlocked(string id)
     {
-        if (unlockedAchievements.Contains(achievementId))
-            return;
+        return unlockedAchievements.Contains(id);
+    }
 
-        unlockedAchievements.Add(achievementId);
+    public void Unlock(string id)
+    {
+        if (IsUnlocked(id)) return;
 
-        Debug.Log($"Achievement unlocked: {achievementId}");
-
-        // Notify UI
-        // Save locally
-        // Send to backend
-        BackendService.Instance?.SendAchievementUnlock(achievementId);
+        unlockedAchievements.Add(id);
+        BackendService.Instance?.SendAchievementUnlock(id);
     }
 }

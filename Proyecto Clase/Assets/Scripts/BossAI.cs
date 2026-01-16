@@ -12,6 +12,14 @@ public class BossAI : MonoBehaviour, IDamageable
         HomingShots,    // Attack 4
         DualAttack      // Attack 5
     }
+    [Header("Difficulty")]
+    [SerializeField] private Difficulty difficultyOverride = Difficulty.Normal;
+    [SerializeField] private bool useGameSettingsDifficulty = true;
+
+    [Header("Normal Difficulty")]
+    [Range(0f, 1f)]
+    public float dualAttackChance = 0.25f;
+
     [Header("Arena Detection")]
     public float activationRadius = 12f;
     public bool playerInArena = false;
@@ -33,16 +41,69 @@ public class BossAI : MonoBehaviour, IDamageable
     [Header("References")]
     public Transform firePoint;
     public Transform player;
+    public enum Difficulty
+    {
+        Easy = 0,
+        Normal = 1,
+        Hard = 2,
+        Nightmare = 3
+    }
 
     private Animator anim;
     private BossAttack? lastAttack = null;
     private bool isAttacking = false;
     private bool phase50Triggered = false;
     private bool phase25Triggered = false;
+    [System.Serializable]
+    public class BossDifficultyTuning
+    {
+        [Header("Health")]
+        public float maxHpMultiplier = 1f;
+
+        [Header("Attacks Enabled")]
+        public bool allowDualAttack = true;
+
+        [Header("Cross Spin")]
+        public float crossSpinAngleStep = 7.5f;
+        public bool randomSpinDirection = false;
+
+        [Header("Circle Wave")]
+        public int randomCircleProjectiles = 24;
+        public int randomCircleWaves = 3;
+        public int randomCircleWavesLowHP = 3;
+
+        [Header("Homing Shots")]
+        public int homingShotsNormal = 2;
+        public int homingShotsLowHP = 3;
+    }
+    [Header("Difficulty Presets")]
+    public BossDifficultyTuning easy;
+    public BossDifficultyTuning normal;
+    public BossDifficultyTuning hard;
+    public BossDifficultyTuning nightmare;
+    Difficulty CurrentDifficulty =>
+        useGameSettingsDifficulty && GameManager.Instance
+            ? (Difficulty)GameManager.Instance.Settings.difficulty
+            : difficultyOverride;
+
+    BossDifficultyTuning Tuning
+    {
+        get
+        {
+            switch (CurrentDifficulty)
+            {
+                case Difficulty.Easy: return easy;
+                case Difficulty.Hard: return hard;
+                case Difficulty.Nightmare: return nightmare;
+                default: return normal;
+            }
+        }
+    }
 
     void Start()
     {
         anim = GetComponent<Animator>();
+        maxHealth = Mathf.RoundToInt(maxHealth * Tuning.maxHpMultiplier);
         currentHealth = maxHealth;
 
         if (!player)
@@ -179,17 +240,22 @@ public class BossAI : MonoBehaviour, IDamageable
     BossAttack GetRandomAttack()
     {
         List<BossAttack> pool = new List<BossAttack>
-        {
-            BossAttack.CrossSpin,
-            BossAttack.CircleWave,
-            BossAttack.RandomCircle
-        };
+    {
+        BossAttack.CrossSpin,
+        BossAttack.CircleWave,
+        BossAttack.RandomCircle
+    };
 
         if (currentHealth <= maxHealth * 0.5f)
             pool.Add(BossAttack.HomingShots);
 
-        if (currentHealth <= maxHealth * 0.25f)
+        if (Tuning.allowDualAttack &&
+            CurrentDifficulty == Difficulty.Normal &&
+            currentHealth <= maxHealth * 0.25f &&
+            Random.value <= dualAttackChance)
+        {
             pool.Add(BossAttack.DualAttack);
+        }
 
         if (lastAttack.HasValue)
             pool.Remove(lastAttack.Value);
@@ -201,16 +267,32 @@ public class BossAI : MonoBehaviour, IDamageable
     {
         anim.SetTrigger("Attack");
 
-        float angleStep = 7.5f;
         float delay = currentHealth <= maxHealth * 0.25f ? 0.25f : 0.4f;
         float speed = currentHealth <= maxHealth * 0.25f ? 7f : 6f;
+        float angleStep = Tuning.crossSpinAngleStep;
+        int dir = 1;
+
+        if (Tuning.randomSpinDirection)
+            dir = Random.value > 0.5f ? 1 : -1;
 
         for (float offset = 0; offset <= 180; offset += angleStep)
         {
-            FireAtAngle(0 + offset, speed);
-            FireAtAngle(90 + offset, speed);
-            FireAtAngle(180 + offset, speed);
-            FireAtAngle(270 + offset, speed);
+            float o = offset * dir;
+
+            FireAtAngle(0 + o, speed);
+            FireAtAngle(90 + o, speed);
+            FireAtAngle(180 + o, speed);
+            FireAtAngle(270 + o, speed);
+
+            // Nightmare under 25% HP = add rotated set
+            if (CurrentDifficulty == Difficulty.Nightmare &&
+                currentHealth <= maxHealth * 0.25f)
+            {
+                FireAtAngle(45 + o, speed);
+                FireAtAngle(135 + o, speed);
+                FireAtAngle(225 + o, speed);
+                FireAtAngle(315 + o, speed);
+            }
 
             yield return new WaitForSeconds(delay);
         }
@@ -220,7 +302,20 @@ public class BossAI : MonoBehaviour, IDamageable
     {
         anim.SetTrigger("Attack");
 
+        // ----- WAVE COUNTS -----
         int waves = 3;
+        if (random)
+        {
+            waves = Tuning.randomCircleWaves;
+
+            if (CurrentDifficulty == Difficulty.Nightmare &&
+                currentHealth <= maxHealth * 0.25f)
+            {
+                waves = Tuning.randomCircleWavesLowHP;
+            }
+        }
+
+        // ----- TIMING -----
         float delay = currentHealth <= maxHealth * 0.25f ? 0.75f : 1f;
         float speed = random ? 7f : 6f;
 
@@ -230,24 +325,53 @@ public class BossAI : MonoBehaviour, IDamageable
         {
             float offset = random ? Random.Range(0f, 360f) : baseOffset;
 
+            // ==========================================================
+            // NON-RANDOM CIRCLE WAVE (structured ring)
+            // ==========================================================
             if (!random)
             {
                 for (int angle = 0; angle < 360; angle += 15)
                 {
-                    FireAtAngle(angle + offset, speed);
+                    float finalAngle = angle + offset;
+
+                    // NIGHTMARE = BOOMERANG PROJECTILES
+                    if (CurrentDifficulty == Difficulty.Nightmare)
+                    {
+                        GameObject proj = Instantiate(
+                            projectilePrefab,
+                            firePoint.position,
+                            Quaternion.Euler(0f, 0f, finalAngle)
+                        );
+
+                        BoomerangProjectile boom = proj.AddComponent<BoomerangProjectile>();
+                        boom.speed = speed;
+                        boom.returnSpeed = currentHealth <= maxHealth * 0.25f
+                            ? speed * 1.75f
+                            : speed * 1.25f;
+
+                        boom.boss = transform;
+                    }
+                    else
+                    {
+                        FireAtAngle(finalAngle, speed);
+                    }
                 }
             }
+            // ==========================================================
+            // RANDOM CIRCLE WAVE
+            // ==========================================================
             else
             {
-                int projectileCount = 24; // same density as 360 / 15
+                int projectileCount = Tuning.randomCircleProjectiles;
 
                 for (int i = 0; i < projectileCount; i++)
                 {
                     float angle = Random.Range(0f, 360f);
+
                     FireAtAngle(angle, speed);
                 }
-
             }
+
             baseOffset += 5f;
             yield return new WaitForSeconds(delay);
         }
@@ -257,13 +381,22 @@ public class BossAI : MonoBehaviour, IDamageable
     {
         anim.SetTrigger("Attack4");
 
-        int count = currentHealth <= maxHealth * 0.25f ? 3 : 2;
+        int count =
+        currentHealth <= maxHealth * 0.25f
+        ? Tuning.homingShotsLowHP
+        : Tuning.homingShotsNormal;
 
-        for (int i = 0; i < count; i++)
+        Vector2[] dirs = count == 4
+            ? new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right }
+            : new[] { Vector2.left, Vector2.right };
+
+        foreach (var d in dirs)
         {
-            Instantiate(homingProjectilePrefab, firePoint.position, Quaternion.identity);
-            yield return new WaitForSeconds(0.3f);
+            var proj = Instantiate(homingProjectilePrefab, firePoint.position, Quaternion.identity);
+            proj.transform.right = d;
+            yield return new WaitForSeconds(0.25f);
         }
+
     }
 
     IEnumerator Attack_Dual()

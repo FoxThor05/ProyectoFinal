@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject deathScreen;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject loginMenu;
+    [SerializeField] private GameObject difficultyRestartPopup;
 
     // ---------------- LIFECYCLE ----------------
     void Awake()
@@ -52,29 +53,20 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    public void ReloadSettingsFromDisk()
-    {
-        Settings = GameSettings.Load();
-    }
-
     void Update()
     {
-        if (CurrentState == GameState.Gameplay || CurrentState == GameState.Paused)
+        if ((CurrentState == GameState.Gameplay || CurrentState == GameState.Paused) &&
+            Input.GetKeyDown(KeyCode.Escape))
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
-                TogglePause();
+            TogglePause();
         }
     }
 
     void OnApplicationQuit()
     {
-        Settings.Save();
-    }
-
-    void PlayMenuMusic()
-    {
-        if (MusicManager.Instance)
-            MusicManager.Instance.PlayMenuMusic();
+        // Prevent half-applied difficulty from being saved
+        if (!Settings.difficultyPendingRestart)
+            Settings.Save();
     }
 
     // ---------------- SCENE HANDLING ----------------
@@ -109,37 +101,22 @@ public class GameManager : MonoBehaviour
 
     public void OpenSettings()
     {
-        settingsMenu.SetActive(true);
+        if (settingsMenu)
+            settingsMenu.SetActive(true);
     }
 
     public void CloseSettings()
     {
-        settingsMenu.SetActive(false);
+        if (settingsMenu)
+            settingsMenu.SetActive(false);
     }
 
     public void QuitGame()
     {
-        Settings.Save();
+        if (!Settings.difficultyPendingRestart)
+            Settings.Save();
+
         Application.Quit();
-
-#if UNITY_EDITOR
-        Debug.Log("Quit Game (Editor)");
-#endif
-    }
-
-    // ---------------- DEATH ----------------
-    public void PlayerDied()
-    {
-        if (CurrentState == GameState.Dead)
-            return;
-
-        SetState(GameState.Dead);
-
-        if (MusicManager.Instance)
-        {
-            MusicManager.Instance.StopBossMusic();
-            MusicManager.Instance.StopNormalMusic();
-        }
     }
 
     // ---------------- PAUSE ----------------
@@ -151,32 +128,11 @@ public class GameManager : MonoBehaviour
             ResumeGame();
     }
 
-    public void PauseGame()
-    {
-        SetState(GameState.Paused);
-    }
+    void PauseGame() => SetState(GameState.Paused);
+    void ResumeGame() => SetState(GameState.Gameplay);
 
-    public void ResumeGame()
-    {
-        SetState(GameState.Gameplay);
-    }
-
-    // ---------------- LOGIN MENU ----------------
-
-    public void OpenLoginMenu()
-    {
-        if (loginMenu)
-            loginMenu.SetActive(true);
-        PlayMenuMusic();
-    }
-
-    public void CloseLoginMenu()
-    {
-        if (loginMenu)
-            loginMenu.SetActive(false);
-    }
     // ---------------- STATE MACHINE ----------------
-    void SetState(GameState newState)
+    public void SetState(GameState newState)
     {
         CurrentState = newState;
 
@@ -208,6 +164,74 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ---------------- DIFFICULTY HANDLING ----------------
+
+    public void HandleSettingsSaved()
+    {
+        // Show popup if a difficulty change is pending
+        if (Settings.difficultyPendingRestart)
+        {
+            ShowDifficultyRestartPopup();
+        }
+    }
+
+    public void ShowDifficultyRestartPopup()
+    {
+        if (difficultyRestartPopup)
+        {
+            difficultyRestartPopup.SetActive(true);
+            Time.timeScale = 0f; // Pause the game while popup is active
+        }
+    }
+
+    public void ConfirmDifficultyRestart()
+    {
+        // Commit difficulty
+        PlayerPrefs.SetInt("Difficulty", Settings.difficulty);
+        PlayerPrefs.Save();
+
+        Settings.previousDifficulty = Settings.difficulty;
+        Settings.difficultyPendingRestart = false;
+
+        Time.timeScale = 1f;
+        difficultyRestartPopup.SetActive(false);
+
+        // Send player to main menu after confirming
+        ReturnToMainMenu();
+    }
+
+    public void CancelDifficultyRestart()
+    {
+        // Revert difficulty change
+        Settings.difficulty = Settings.previousDifficulty;
+        Settings.difficultyPendingRestart = false;
+
+        Time.timeScale = 1f;
+        difficultyRestartPopup.SetActive(false);
+
+        // Refresh the dropdown in the settings menu, if it's open
+        var menu = FindObjectOfType<SettingsMenu>();
+        if (menu != null)
+            menu.RefreshDifficultyDropdown();
+    }
+
+    // ---------------- SAVE FROM MENU ----------------
+    public void SaveSettingsFromMenu()
+    {
+        // Save all non-difficulty settings
+        Settings.Save();
+
+        // Check if difficulty changed and mark pending if so
+        if (Settings.CheckDifficultyChanged())
+        {
+            // Show popup
+            HandleSettingsSaved();
+        }
+    }
+
+
+
+    // ---------------- UI HELPERS ----------------
     void SetPauseMenu(bool visible)
     {
         if (pauseMenu)
@@ -218,5 +242,21 @@ public class GameManager : MonoBehaviour
     {
         if (deathScreen)
             deathScreen.SetActive(visible);
+    }
+    public void OpenLoginMenu() 
+    { 
+        if (loginMenu) 
+            loginMenu.SetActive(true); 
+        PlayMenuMusic(); 
+    }
+    void PlayMenuMusic()
+    { 
+        if (MusicManager.Instance) 
+            MusicManager.Instance.PlayMenuMusic(); 
+    }
+    public void CloseLoginMenu() 
+    { 
+        if (loginMenu) 
+            loginMenu.SetActive(false); 
     }
 }

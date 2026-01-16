@@ -514,7 +514,7 @@ public class PlayerController : MonoBehaviour
     void Die()
     {
         Debug.Log("Player died!");
-        GameManager.Instance.PlayerDied();
+        GameManager.Instance.SetState(GameManager.GameState.Dead);
     }
 
     // --------------------
