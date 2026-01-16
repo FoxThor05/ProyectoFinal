@@ -8,7 +8,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TetoAttack
-  m_Speed: 0.2
+  m_Speed: 0.4
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -6988698919171871792}
@@ -324,7 +324,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TetoAttack4
-  m_Speed: 0.2
+  m_Speed: 0.4
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 433483108263869558}
