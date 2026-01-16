@@ -31,17 +31,20 @@ public class LoginUIHandler : MonoBehaviour
 
         BackendService.Instance.Login(username, password, (success, message) =>
         {
-            if (success)
-                feedbackText.text = "Logged in!";
-            else
+            if (!success)
+            {
                 feedbackText.text = "Login failed: " + message;
-        });
-        BackendService.Instance.FetchUnlockedAchievements(unlocked =>
-        {
-            foreach (var id in unlocked)
-                AchievementManager.Instance.Unlock(id);
-        });
+                return;
+            }
 
+            feedbackText.text = "Logged in!";
+
+            // Fetch achievements ONLY after login succeeded (token is now set)
+            BackendService.Instance.FetchUnlockedAchievements(unlocked =>
+            {
+                AchievementManager.Instance.SetUnlockedAchievements(unlocked);
+            });
+        });
     }
 
     void OnRegisterClicked()
@@ -52,10 +55,18 @@ public class LoginUIHandler : MonoBehaviour
 
         BackendService.Instance.Register(username, password, (success, message) =>
         {
-            if (success)
-                feedbackText.text = "Registered and logged in!";
-            else
+            if (!success)
+            {
                 feedbackText.text = "Register failed: " + message;
+                return;
+            }
+
+            feedbackText.text = "Registered and logged in!";
+
+            BackendService.Instance.FetchUnlockedAchievements(unlocked =>
+            {
+                AchievementManager.Instance.SetUnlockedAchievements(unlocked);
+            });
         });
     }
 
@@ -64,6 +75,7 @@ public class LoginUIHandler : MonoBehaviour
         BackendService.Instance.PlayAsGuest(() =>
         {
             feedbackText.text = "Playing as Guest";
+            AchievementManager.Instance.SetUnlockedAchievements(new string[0]);
         });
     }
 

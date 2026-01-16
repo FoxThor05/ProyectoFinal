@@ -5,6 +5,7 @@ public class AchievementDTO
     public string name;
     public string description;
     public string rarity;
+    public string icon_key;
 }
 
 [System.Serializable]

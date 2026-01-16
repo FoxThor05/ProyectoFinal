@@ -10,6 +10,10 @@ public class AchievementItemUI : MonoBehaviour
     public Image backgroundPanel;
     public GameObject lockedOverlay;
 
+    // NEW: optional icon image in your prefab
+    [Header("Icon (Optional)")]
+    public Image iconImage;
+
     [Header("Text Colors")]
     public Color commonText = Color.white;
     public Color rareText = Color.cyan;
@@ -32,11 +36,27 @@ public class AchievementItemUI : MonoBehaviour
 
         if (!unlocked)
             DimVisuals();
+
+        ApplyIcon(data);
+    }
+
+    void ApplyIcon(AchievementDTO data)
+    {
+        if (!iconImage) return;
+
+        string key = string.IsNullOrEmpty(data.icon_key) ? data.id : data.icon_key;
+
+        Sprite icon = AchievementIconLibrary.Instance
+            ? AchievementIconLibrary.Instance.GetIcon(key)
+            : null;
+
+        iconImage.enabled = (icon != null);
+        iconImage.sprite = icon;
     }
 
     void ApplyRarityVisuals(string rarity)
     {
-        rarity = rarity.ToLower();
+        rarity = (rarity ?? "common").ToLower();
 
         Color bg;
         Color text;
@@ -74,5 +94,8 @@ public class AchievementItemUI : MonoBehaviour
         backgroundPanel.color *= 0.5f;
         title.color *= 0.6f;
         description.color *= 0.6f;
+
+        if (iconImage)
+            iconImage.color *= 0.6f;
     }
 }

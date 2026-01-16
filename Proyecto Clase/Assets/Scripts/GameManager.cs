@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject deathScreen;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject loginMenu;
+    [SerializeField] private GameObject achievementsMenu;
     [SerializeField] private GameObject difficultyRestartPopup;
 
     // ---------------- LIFECYCLE ----------------
@@ -46,6 +47,12 @@ public class GameManager : MonoBehaviour
 
         Settings = GameSettings.Load();
         SceneManager.sceneLoaded += OnSceneLoaded;
+
+        if (SceneManager.GetActiveScene().name != "MenuInicial")
+        {
+            SetState(GameState.Menu); // sets timeScale = 0, hides gameplay UI
+            SceneManager.LoadScene("MenuInicial"); // switch to your starting menu
+        }
     }
 
     void OnDestroy()
@@ -79,11 +86,21 @@ public class GameManager : MonoBehaviour
     {
         if (pauseMenu) pauseMenu.SetActive(false);
         if (deathScreen) deathScreen.SetActive(false);
+        if (achievementsMenu) achievementsMenu.SetActive(false);
+
     }
 
     // ---------------- GAME FLOW ----------------
     public void StartNewGame()
     {
+        // HARD GATE: require an active profile (logged-in OR guest)
+        if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("StartNewGame blocked: no active profile. Opening login menu.");
+            OpenLoginMenu();
+            return;
+        }
+
         Time.timeScale = 1f;
         SetState(GameState.Gameplay);
         SceneManager.LoadScene(gameScene);
@@ -165,7 +182,6 @@ public class GameManager : MonoBehaviour
     }
 
     // ---------------- DIFFICULTY HANDLING ----------------
-
     public void HandleSettingsSaved()
     {
         // Show popup if a difficulty change is pending
@@ -229,9 +245,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-
     // ---------------- UI HELPERS ----------------
+
+    public void OpenAchievementsMenu()
+    {
+        if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
+        {
+            OpenLoginMenu();
+            return;
+        }
+
+        if (achievementsMenu)
+            achievementsMenu.SetActive(true);
+    }
+
+    public void CloseAchievementsMenu()
+    {
+        if (achievementsMenu)
+            achievementsMenu.SetActive(false);
+    }
+
     void SetPauseMenu(bool visible)
     {
         if (pauseMenu)
@@ -243,20 +276,24 @@ public class GameManager : MonoBehaviour
         if (deathScreen)
             deathScreen.SetActive(visible);
     }
-    public void OpenLoginMenu() 
-    { 
-        if (loginMenu) 
-            loginMenu.SetActive(true); 
-        PlayMenuMusic(); 
+
+    public void OpenLoginMenu()
+    {
+        if (loginMenu)
+            loginMenu.SetActive(true);
+
+        PlayMenuMusic();
     }
+
     void PlayMenuMusic()
-    { 
-        if (MusicManager.Instance) 
-            MusicManager.Instance.PlayMenuMusic(); 
+    {
+        if (MusicManager.Instance)
+            MusicManager.Instance.PlayMenuMusic();
     }
-    public void CloseLoginMenu() 
-    { 
-        if (loginMenu) 
-            loginMenu.SetActive(false); 
+
+    public void CloseLoginMenu()
+    {
+        if (loginMenu)
+            loginMenu.SetActive(false);
     }
 }

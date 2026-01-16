@@ -17,8 +17,6 @@ public class BackendService : MonoBehaviour
     public bool IsLoggedIn => !string.IsNullOrEmpty(accessToken);
 
     // ---------------- DTOs ----------------
-
-
     [System.Serializable]
     public class AchievementListWrapper
     {
@@ -45,6 +43,14 @@ public class BackendService : MonoBehaviour
         public string access_token;
         public string refresh_token;
         public AuthUser user;
+    }
+
+    // RPC payload for insert_profile(username)
+    [System.Serializable]
+    private class InsertProfilePayload
+    {
+        public string _username;
+        public InsertProfilePayload(string username) => _username = username;
     }
 
     void Awake()
@@ -102,6 +108,9 @@ public class BackendService : MonoBehaviour
         UserManager.Instance.SetUser(profile);
         PlayerPrefs.SetString("refresh_token", refreshToken);
 
+        // Ensure profile exists (safe on conflict)
+        yield return StartCoroutine(EnsureProfileRoutine(username));
+
         callback(true, null);
     }
 
@@ -133,27 +142,36 @@ public class BackendService : MonoBehaviour
 
         var response = JsonUtility.FromJson<AuthResponse>(req.downloadHandler.text);
 
-        StartCoroutine(InsertProfileRoutine(username));
+        accessToken = response.access_token;
+        refreshToken = response.refresh_token;
+        userId = response.user.id;
 
         var profile = new UserProfile
         {
             id = response.user.id,
             username = username,
-            accessToken = response.access_token,
-            refreshToken = response.refresh_token
+            accessToken = accessToken,
+            refreshToken = refreshToken
         };
 
         UserManager.Instance.SetUser(profile);
-        PlayerPrefs.SetString("refresh_token", response.refresh_token);
+        PlayerPrefs.SetString("refresh_token", refreshToken);
+
+        yield return StartCoroutine(EnsureProfileRoutine(username));
 
         callback(true, null);
     }
 
-    IEnumerator InsertProfileRoutine(string username)
+    // ---------------- PROFILE UPSERT (RPC) ----------------
+    IEnumerator EnsureProfileRoutine(string username)
     {
-        string json = $"{{ \"id\": \"{userId}\", \"username\": \"{username}\" }}";
+        if (!IsLoggedIn)
+            yield break;
 
-        var req = new UnityWebRequest($"{supabaseUrl}/rest/v1/profiles", "POST");
+        string url = $"{supabaseUrl}/rest/v1/rpc/insert_profile";
+        string json = JsonUtility.ToJson(new InsertProfilePayload(username));
+
+        var req = new UnityWebRequest(url, "POST");
         req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
         req.downloadHandler = new DownloadHandlerBuffer();
 
@@ -164,7 +182,9 @@ public class BackendService : MonoBehaviour
         yield return req.SendWebRequest();
 
         if (req.result != UnityWebRequest.Result.Success)
-            Debug.LogWarning("Profile insert failed: " + req.downloadHandler.text);
+        {
+            Debug.LogWarning("EnsureProfile RPC failed: " + req.downloadHandler.text);
+        }
     }
 
     // ---------------- LOGOUT ----------------
@@ -216,8 +236,9 @@ public class BackendService : MonoBehaviour
 
     IEnumerator FetchAllAchievementsRoutine(System.Action<AchievementDTO[]> callback)
     {
+        // UPDATED: includes icon_key
         var req = UnityWebRequest.Get(
-            $"{supabaseUrl}/rest/v1/achievements?select=id,name,description,rarity"
+            $"{supabaseUrl}/rest/v1/achievements?select=id,name,description,rarity,icon_key"
         );
 
         req.SetRequestHeader("apikey", apiKey);
