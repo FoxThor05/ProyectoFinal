@@ -1,2 +1,2 @@
 # ProyectoFinal
-porfavor funciona de una vez github de mierda
+Proyecto para mi Ciclo Formativo de Grado Superior en Desarrollo de Aplicaciones Multiplataforma.
