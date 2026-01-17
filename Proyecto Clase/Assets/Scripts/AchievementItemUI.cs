@@ -28,17 +28,6 @@ public class AchievementItemUI : MonoBehaviour
         string finalName = data.name;
         string finalDesc = data.description;
 
-        // If localization exists, override by achievement id keys
-        // Keys: achievement.<id>.name and achievement.<id>.desc
-        if (LocalizationManager.Instance != null && !string.IsNullOrEmpty(data.id))
-        {
-            string nameKey = $"achievement.{data.id}.name";
-            string descKey = $"achievement.{data.id}.desc";
-
-            finalName = LocalizationManager.Instance.Get(nameKey, finalName);
-            finalDesc = LocalizationManager.Instance.Get(descKey, finalDesc);
-        }
-
         title.text = finalName;
         description.text = finalDesc;
 
