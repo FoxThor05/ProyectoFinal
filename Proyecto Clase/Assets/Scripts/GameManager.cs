@@ -93,12 +93,13 @@ public class GameManager : MonoBehaviour
         if (pauseMenu) pauseMenu.SetActive(false);
         if (deathScreen) deathScreen.SetActive(false);
         if (victoryScreen) victoryScreen.SetActive(false);
+        if (achievementsMenu) achievementsMenu.SetActive(false);
+
     }
 
     // ---------------- GAME FLOW ----------------
     public void StartNewGame()
     {
-        // Reset run flags for "no damage run" achievement
         tookDamageThisRun = false;
 
         Time.timeScale = 1f;
@@ -199,26 +200,31 @@ public class GameManager : MonoBehaviour
         tookDamageThisRun = true;
     }
 
+    public bool HasTakenDamageThisRun()
+    {
+        return tookDamageThisRun;
+    }
+
     public void OnBossDefeated()
     {
-        // Difficulty achievements: ids 5..9
-        // difficulty: 0 Easy, 1 Normal, 2 Hard, 3 Nightmare
         int d = Settings != null ? Settings.difficulty : 0;
 
-        AchievementManager.Instance?.Unlock("5");          // Easy or higher (always)
+        // Difficulty achievements: ids 5..9
+        AchievementManager.Instance?.Unlock("5");
         if (d >= 1) AchievementManager.Instance?.Unlock("6");
         if (d >= 2) AchievementManager.Instance?.Unlock("7");
         if (d >= 3) AchievementManager.Instance?.Unlock("8");
 
-        if (d >= 3 && !tookDamageThisRun)
+        bool flawless = (d >= 3 && !tookDamageThisRun);
+        if (flawless)
             AchievementManager.Instance?.Unlock("9");
+
+        // Victory music (conditional swap)
+        if (MusicManager.Instance)
+            MusicManager.Instance.PlayVictoryMusic(difficulty: d, flawless: flawless);
 
         // Show victory UI
         SetState(GameState.Victory);
-
-        // Optional music behavior: switch back to menu music
-        if (MusicManager.Instance)
-            MusicManager.Instance.PlayMenuMusic();
     }
 
     public void CloseVictoryAndReturnToMenu()
@@ -287,22 +293,6 @@ public class GameManager : MonoBehaviour
         if (pauseMenu)
             pauseMenu.SetActive(visible);
     }
-    public void OpenAchievementsMenu()
-    {
-        if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
-        {
-            OpenLoginMenu();
-            return;
-        }
-
-        if (achievementsMenu)
-            achievementsMenu.SetActive(true);
-    }
-    public void CloseAchievementsMenu()
-    {
-        if (achievementsMenu)
-            achievementsMenu.SetActive(false);
-    }
 
     void SetDeathScreen(bool visible)
     {
@@ -335,4 +325,22 @@ public class GameManager : MonoBehaviour
         if (loginMenu)
             loginMenu.SetActive(false);
     }
+    public void OpenAchievementsMenu()
+    {
+        if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
+        {
+            OpenLoginMenu();
+            return;
+        }
+
+        if (achievementsMenu)
+            achievementsMenu.SetActive(true);
+    }
+
+    public void CloseAchievementsMenu()
+    {
+        if (achievementsMenu)
+            achievementsMenu.SetActive(false);
+    }
+
 }
