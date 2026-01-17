@@ -51,12 +51,6 @@ public class BossAI : MonoBehaviour, IDamageable
         Nightmare = 3
     }
 
-    private Animator anim;
-    private BossAttack? lastAttack = null;
-    private bool isAttacking = false;
-    private bool phase50Triggered = false;
-    private bool phase25Triggered = false;
-
     [System.Serializable]
     public class BossDifficultyTuning
     {
@@ -86,6 +80,15 @@ public class BossAI : MonoBehaviour, IDamageable
     public BossDifficultyTuning hard;
     public BossDifficultyTuning nightmare;
 
+    [Header("Aura Trigger (Child)")]
+    [Tooltip("Assign the child capsule trigger here (recommended). If empty, BossAI will try to find a child named 'BossPushAura'.")]
+    [SerializeField] private CapsuleCollider2D auraTrigger;
+
+    private Animator anim;
+    private BossAttack? lastAttack = null;
+    private bool phase50Triggered = false;
+    private bool phase25Triggered = false;
+
     Difficulty CurrentDifficulty =>
         useGameSettingsDifficulty && GameManager.Instance
             ? (Difficulty)GameManager.Instance.Settings.difficulty
@@ -108,13 +111,54 @@ public class BossAI : MonoBehaviour, IDamageable
     void Start()
     {
         anim = GetComponent<Animator>();
+
         maxHealth = Mathf.RoundToInt(maxHealth * Tuning.maxHpMultiplier);
         currentHealth = maxHealth;
 
         if (!player)
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+        {
+            var p = GameObject.FindGameObjectWithTag("Player");
+            if (p) player = p.transform;
+        }
+
+        EnsureBossColliderIsSolid();
+        EnsureAuraTriggerIsTriggerAndHasScript();
 
         StartCoroutine(BossLoop());
+    }
+
+    void EnsureBossColliderIsSolid()
+    {
+        // Make sure boss root colliders are NOT triggers (so player cannot phase through boss).
+        var colliders = GetComponents<Collider2D>();
+        foreach (var c in colliders)
+        {
+            if (c == null) continue;
+            c.isTrigger = false;
+        }
+    }
+
+    void EnsureAuraTriggerIsTriggerAndHasScript()
+    {
+        if (!auraTrigger)
+        {
+            Transform child = transform.Find("BossPushAura");
+            if (child)
+                auraTrigger = child.GetComponent<CapsuleCollider2D>();
+        }
+
+        if (!auraTrigger)
+        {
+            Debug.LogWarning("[BossAI] No auraTrigger assigned/found. Create a child named 'BossPushAura' with CapsuleCollider2D set to Trigger, or assign it in the inspector.");
+            return;
+        }
+
+        // Aura must be trigger
+        auraTrigger.isTrigger = true;
+
+        // Ensure the damage/knockback behaviour exists
+        if (!auraTrigger.GetComponent<BossPushAura>())
+            auraTrigger.gameObject.AddComponent<BossPushAura>();
     }
 
     bool IsPlayerInArena()
@@ -147,14 +191,11 @@ public class BossAI : MonoBehaviour, IDamageable
     // CALLED BY DEFEAT ANIMATION EVENT
     public void DestroyBoss()
     {
-        // Achievement 1: "First Steps" (first kill). Boss counts as a kill too.
         AchievementManager.Instance.Unlock("1");
 
-        // Hide boss bar immediately
         if (bossHealthBar)
             bossHealthBar.Hide();
 
-        // Trigger victory flow
         if (GameManager.Instance)
             GameManager.Instance.OnBossDefeated();
 
@@ -174,8 +215,6 @@ public class BossAI : MonoBehaviour, IDamageable
                 {
                     playerInArena = false;
 
-                    Debug.Log("Boss arena exited");
-
                     MusicManager.Instance.PlayNormalMusic();
 
                     if (bossHealthBar)
@@ -189,8 +228,6 @@ public class BossAI : MonoBehaviour, IDamageable
             {
                 playerInArena = true;
 
-                Debug.Log("Boss arena entered");
-
                 MusicManager.Instance.PlayBossMusic();
 
                 if (bossHealthBar)
@@ -199,9 +236,7 @@ public class BossAI : MonoBehaviour, IDamageable
 
             yield return StartCoroutine(DoNextAttack());
 
-            float wait = currentHealth <= maxHealth * 0.25f
-                ? lowHpCooldown
-                : attackCooldown;
+            float wait = currentHealth <= maxHealth * 0.25f ? lowHpCooldown : attackCooldown;
 
             float t = 0f;
             while (t < wait)
@@ -217,8 +252,6 @@ public class BossAI : MonoBehaviour, IDamageable
 
     IEnumerator DoNextAttack()
     {
-        isAttacking = true;
-
         BossAttack next = GetRandomAttack();
         lastAttack = next;
 
@@ -244,8 +277,6 @@ public class BossAI : MonoBehaviour, IDamageable
                 yield return StartCoroutine(Attack_Dual());
                 break;
         }
-
-        isAttacking = false;
     }
 
     BossAttack GetRandomAttack()
@@ -312,15 +343,12 @@ public class BossAI : MonoBehaviour, IDamageable
     {
         anim.SetTrigger("Attack");
 
+        // Low HP wave boost applies across difficulties (uses each difficulty's tuning)
         int waves = 3;
         if (random)
         {
-            waves = Tuning.randomCircleWaves;
-            if (CurrentDifficulty == Difficulty.Nightmare &&
-                currentHealth <= maxHealth * 0.25f)
-            {
-                waves = Tuning.randomCircleWavesLowHP;
-            }
+            bool lowHp = currentHealth <= maxHealth * 0.25f;
+            waves = lowHp ? Tuning.randomCircleWavesLowHP : Tuning.randomCircleWaves;
         }
 
         float delay = currentHealth <= maxHealth * 0.25f ? 0.75f : 1f;
@@ -440,7 +468,6 @@ public class BossAI : MonoBehaviour, IDamageable
     void FireAtAngle(float angle, float speed)
     {
         Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.right;
-
         float zRot = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
         GameObject proj = Instantiate(
