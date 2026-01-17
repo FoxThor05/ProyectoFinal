@@ -41,9 +41,15 @@ public class MainMenu : MonoBehaviour
     {
         GameManager.Instance.QuitGame();
     }
+
     public void OpenAchievements()
     {
         GameManager.Instance.OpenAchievementsMenu();
+    }
+
+    public void OpenLeaderboard()
+    {
+        GameManager.Instance.OpenLeaderboardMenu();
     }
 
     public void OpenSettings()

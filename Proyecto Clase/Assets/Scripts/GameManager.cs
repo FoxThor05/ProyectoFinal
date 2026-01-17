@@ -34,6 +34,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject difficultyRestartPopup;
     [SerializeField] private GameObject achievementsMenu;
 
+    [Header("Leaderboard UI")]
+    [SerializeField] private GameObject leaderboardMenu;
+
     [Header("Victory UI")]
     [SerializeField] private GameObject victoryScreen;
 
@@ -94,7 +97,7 @@ public class GameManager : MonoBehaviour
         if (deathScreen) deathScreen.SetActive(false);
         if (victoryScreen) victoryScreen.SetActive(false);
         if (achievementsMenu) achievementsMenu.SetActive(false);
-
+        if (leaderboardMenu) leaderboardMenu.SetActive(false);
     }
 
     // ---------------- GAME FLOW ----------------
@@ -325,6 +328,7 @@ public class GameManager : MonoBehaviour
         if (loginMenu)
             loginMenu.SetActive(false);
     }
+
     public void OpenAchievementsMenu()
     {
         if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
@@ -343,4 +347,23 @@ public class GameManager : MonoBehaviour
             achievementsMenu.SetActive(false);
     }
 
+    // ---------------- LEADERBOARD ----------------
+    public void OpenLeaderboardMenu()
+    {
+        // If you want leaderboard visible to guests, remove this gate.
+        if (UserManager.Instance == null || !UserManager.Instance.IsLoggedIn)
+        {
+            OpenLoginMenu();
+            return;
+        }
+
+        if (leaderboardMenu)
+            leaderboardMenu.SetActive(true);
+    }
+
+    public void CloseLeaderboardMenu()
+    {
+        if (leaderboardMenu)
+            leaderboardMenu.SetActive(false);
+    }
 }

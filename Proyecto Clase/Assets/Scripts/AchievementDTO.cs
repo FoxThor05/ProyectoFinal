@@ -5,6 +5,7 @@ public class AchievementDTO
     public string name;
     public string description;
     public string rarity;
+    public int score;
     public string icon_key;
 }
 

@@ -236,9 +236,9 @@ public class BackendService : MonoBehaviour
 
     IEnumerator FetchAllAchievementsRoutine(System.Action<AchievementDTO[]> callback)
     {
-        // UPDATED: includes icon_key
+        // include score + icon_key
         var req = UnityWebRequest.Get(
-            $"{supabaseUrl}/rest/v1/achievements?select=id,name,description,rarity,icon_key"
+            $"{supabaseUrl}/rest/v1/achievements?select=id,name,description,rarity,score,icon_key"
         );
 
         req.SetRequestHeader("apikey", apiKey);
@@ -260,6 +260,7 @@ public class BackendService : MonoBehaviour
 
         callback?.Invoke(data?.items ?? new AchievementDTO[0]);
     }
+
 
     public void FetchUnlockedAchievements(System.Action<string[]> callback)
     {
@@ -315,4 +316,56 @@ public class BackendService : MonoBehaviour
 
         callback?.Invoke();
     }
+
+    [System.Serializable]
+    public class LeaderboardEntryDTO
+    {
+        public string username;
+        public int score;
+        public string[] unlocked;
+    }
+
+    [System.Serializable]
+    public class LeaderboardWrapper
+    {
+        public LeaderboardEntryDTO[] items;
+    }
+
+    public void FetchLeaderboard(int limit, System.Action<LeaderboardEntryDTO[]> callback)
+    {
+        StartCoroutine(FetchLeaderboardRoutine(limit, callback));
+    }
+
+    IEnumerator FetchLeaderboardRoutine(int limit, System.Action<LeaderboardEntryDTO[]> callback)
+    {
+        string url = $"{supabaseUrl}/rest/v1/rpc/get_leaderboard";
+        string json = $"{{ \"_limit\": {Mathf.Max(1, limit)} }}";
+
+        var req = new UnityWebRequest(url, "POST");
+        req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(json));
+        req.downloadHandler = new DownloadHandlerBuffer();
+
+        req.SetRequestHeader("apikey", apiKey);
+        req.SetRequestHeader("Content-Type", "application/json");
+        req.SetRequestHeader("Accept", "application/json");
+
+        // If get_leaderboard is SECURITY DEFINER + granted to anon, you can omit auth header for guests.
+        if (IsLoggedIn)
+            req.SetRequestHeader("Authorization", "Bearer " + accessToken);
+
+        yield return req.SendWebRequest();
+
+        if (req.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Fetch leaderboard failed: " + req.downloadHandler.text);
+            callback?.Invoke(new LeaderboardEntryDTO[0]);
+            yield break;
+        }
+
+        string wrapped = $"{{\"items\":{req.downloadHandler.text}}}";
+        var data = JsonUtility.FromJson<LeaderboardWrapper>(wrapped);
+
+        callback?.Invoke(data?.items ?? new LeaderboardEntryDTO[0]);
+    }
+
 }
