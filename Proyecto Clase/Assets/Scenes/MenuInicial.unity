@@ -1604,6 +1604,34 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4289351128024971889, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_fontSize
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4289351128024971889, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4812631726293879689, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_fontSize
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4812631726293879689, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+    - target: {fileID: 4812631726293879689, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4812631726293879689, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+    - target: {fileID: 4812631726293879689, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6718736719474803808, guid: f38f9cd662ecf584ca0bb2ae4f080153, type: 3}
       propertyPath: m_Name
       value: WeatherCard
