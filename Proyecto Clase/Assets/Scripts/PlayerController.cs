@@ -79,6 +79,14 @@ public class PlayerController : MonoBehaviour
 
     private float currentParryCooldownDuration;
 
+    // ---------------- Parry Achievements (RESTORED) ----------------
+    // "2" = first successful parry
+    // "4" = 10 successful parries in a row (no misses in between)
+    [Header("Parry Achievements")]
+    [SerializeField] private int parryStreakTarget = 10;
+    private int parryStreak = 0;
+    // --------------------------------------------------------------
+
     [Header("Slash Attack")]
     public GameObject slashPrefab;
     public Transform slashSpawnPoint;
@@ -251,6 +259,11 @@ public class PlayerController : MonoBehaviour
 
         if (activeParryShield)
             Destroy(activeParryShield);
+
+        // ---------------- Parry Achievements: reset streak on miss ----------------
+        if (!parrySuccessful)
+            parryStreak = 0;
+        // -------------------------------------------------------------------------
 
         currentParryCooldownDuration = parrySuccessful ? parrySuccessCooldown : parryFailCooldown;
         parryCooldownTimer = currentParryCooldownDuration;
@@ -498,6 +511,11 @@ public class PlayerController : MonoBehaviour
         {
             parrySuccessful = true;
             isParryActive = false;
+
+            // ---------------- Parry Achievements (RESTORED) ----------------
+            RegisterParrySuccess();
+            // ---------------------------------------------------------------
+
             ParryEffect();
             return;
         }
@@ -507,7 +525,25 @@ public class PlayerController : MonoBehaviour
 
         if (currentHealth <= 0)
             Die();
+    }  
+
+    // ---------------- Parry Achievements helper (RESTORED) ----------------
+    void RegisterParrySuccess()
+    {
+        // Achievement "2": first successful parry
+        if (AchievementManager.Instance != null && !AchievementManager.Instance.IsUnlocked("2"))
+            AchievementManager.Instance.Unlock("2");
+
+        // Achievement "4": 10 parries in a row without missing
+        parryStreak++;
+
+        if (parryStreak >= parryStreakTarget)
+        {
+            if (AchievementManager.Instance != null && !AchievementManager.Instance.IsUnlocked("4"))
+                AchievementManager.Instance.Unlock("4");
+        }
     }
+    // ---------------------------------------------------------------------
 
     void FlashDamage()
     {
@@ -521,7 +557,6 @@ public class PlayerController : MonoBehaviour
 
     System.Collections.IEnumerator FlashRoutine()
     {
-        Color original = spriteRenderer.color;
         spriteRenderer.color = damageFlashColor;
 
         float t = 0f;
@@ -531,7 +566,8 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
 
-        spriteRenderer.color = original;
+        // Always restore to neutral color
+        spriteRenderer.color = Color.white;
     }
 
     void ParryEffect()
@@ -549,6 +585,14 @@ public class PlayerController : MonoBehaviour
             if (hit.CompareTag("Projectile"))
                 Destroy(hit.gameObject);
         }
+    }
+    public void HealToFull()
+    {
+        currentHealth = maxHealth;
+
+        // If you have a health bar script, refresh it here
+        // Example:
+        // PlayerHealthBar.Instance?.SetHealth(currentHealth, maxHealth);
     }
 
     void Die()

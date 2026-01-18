@@ -2,22 +2,70 @@
 
 public class EnemyAI : MonoBehaviour, IDamageable
 {
-    [Header("Detection")]
+    [Header("Detection (same for all difficulties)")]
     public float detectionRadius = 8f;
     public float preferredDistance = 3f;
     public float tooCloseDistance = 1.5f;
 
-    [Header("Movement")]
-    public float chaseSpeed = 2f;
-    public float retreatSpeed = 1f;
-    public float stopSmoothing = 5f;
+    [Header("Difficulty")]
+    [SerializeField] private Difficulty difficultyOverride = Difficulty.Normal;
+    [SerializeField] private bool useGameSettingsDifficulty = true;
 
-    [Header("Attack")]
+    public enum Difficulty
+    {
+        Easy = 0,
+        Normal = 1,
+        Hard = 2,
+        Nightmare = 3
+    }
+
+    [System.Serializable]
+    public class EnemyDifficultyTuning
+    {
+        [Header("Spawn")]
+        public bool enabled = true;
+
+        [Header("Health")]
+        public int maxHealth = 50;
+
+        [Header("Movement")]
+        public float chaseSpeed = 2f;
+        public float retreatSpeed = 1f;
+        public float stopSmoothing = 5f;
+
+        [Header("Attack")]
+        public float fireRate = 1.2f;
+        public float projectileSpeed = 6f;
+        public int projectileDamage = 10;
+    }
+
+    [Header("Difficulty Presets")]
+    public EnemyDifficultyTuning easy = new EnemyDifficultyTuning();
+    public EnemyDifficultyTuning normal = new EnemyDifficultyTuning();
+    public EnemyDifficultyTuning hard = new EnemyDifficultyTuning();
+    public EnemyDifficultyTuning nightmare = new EnemyDifficultyTuning();
+
+    Difficulty CurrentDifficulty =>
+        useGameSettingsDifficulty && GameManager.Instance
+            ? (Difficulty)GameManager.Instance.Settings.difficulty
+            : difficultyOverride;
+
+    EnemyDifficultyTuning Tuning
+    {
+        get
+        {
+            switch (CurrentDifficulty)
+            {
+                case Difficulty.Easy: return easy;
+                case Difficulty.Hard: return hard;
+                case Difficulty.Nightmare: return nightmare;
+                default: return normal;
+            }
+        }
+    }
+
+    [Header("Projectile Prefab")]
     public GameObject projectilePrefab;
-    public float fireRate = 1.2f;
-    public float projectileSpeed = 6f;
-    public int projectileDamage = 10;
-    public int maxHealth = 50;
 
     private int currentHealth;
     private Rigidbody2D rb;
@@ -30,18 +78,33 @@ public class EnemyAI : MonoBehaviour, IDamageable
     private SpriteRenderer spriteRenderer;
     private Coroutine flashRoutine;
 
+    void Awake()
+    {
+        // If this enemy type should not exist on this difficulty, remove it immediately.
+        if (Tuning != null && !Tuning.enabled)
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
-        rb.linearDamping = 2f;
 
-        currentHealth = maxHealth;
+        // Apply difficulty-tuned physics settings
+        rb.linearDamping = Tuning.stopSmoothing;
+
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        currentHealth = Tuning.maxHealth;
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj)
             player = playerObj.GetComponent<PlayerController>();
+
+        fireTimer = 0f;
     }
 
     public void TakeDamage(int damage)
@@ -81,7 +144,7 @@ public class EnemyAI : MonoBehaviour, IDamageable
     void Die()
     {
         Debug.Log("Enemy died!");
-        AchievementManager.Instance.Unlock("1");
+        AchievementManager.Instance?.Unlock("1");
         Destroy(gameObject);
     }
 
@@ -102,9 +165,9 @@ public class EnemyAI : MonoBehaviour, IDamageable
         FacePlayer();
 
         if (dist > preferredDistance)
-            rb.linearVelocity = dirToPlayer * chaseSpeed;
+            rb.linearVelocity = dirToPlayer * Tuning.chaseSpeed;
         else if (dist < tooCloseDistance)
-            rb.linearVelocity = -dirToPlayer * retreatSpeed;
+            rb.linearVelocity = -dirToPlayer * Tuning.retreatSpeed;
         else
             SmoothStop();
 
@@ -112,7 +175,7 @@ public class EnemyAI : MonoBehaviour, IDamageable
         if (fireTimer <= 0f)
         {
             Shoot(dirToPlayer);
-            fireTimer = fireRate;
+            fireTimer = Tuning.fireRate;
         }
     }
 
@@ -125,7 +188,8 @@ public class EnemyAI : MonoBehaviour, IDamageable
 
     void SmoothStop()
     {
-        rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, stopSmoothing * Time.fixedDeltaTime);
+        // We keep the "stop smoothing" concept but tune it per difficulty.
+        rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, Tuning.stopSmoothing * Time.fixedDeltaTime);
     }
 
     void Shoot(Vector2 dir)
@@ -138,11 +202,11 @@ public class EnemyAI : MonoBehaviour, IDamageable
 
         Rigidbody2D prb = proj.GetComponent<Rigidbody2D>();
         if (prb)
-            prb.linearVelocity = dir * projectileSpeed;
+            prb.linearVelocity = dir * Tuning.projectileSpeed;
 
         EnemyProjectile ep = proj.GetComponent<EnemyProjectile>();
         if (ep)
-            ep.damage = projectileDamage;
+            ep.damage = Tuning.projectileDamage;
     }
 
     void OnDrawGizmosSelected()
