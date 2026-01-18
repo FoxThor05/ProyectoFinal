@@ -6,8 +6,6 @@ public class PlayerController : MonoBehaviour
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float jumpForce = 12f;
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
 
     [Header("Variable Jump Settings")]
@@ -30,13 +28,36 @@ public class PlayerController : MonoBehaviour
     public float dashForce = 20f;
     public float dashDuration = 0.15f;
     public float dashCooldown = 1f;
-    public GameObject dashTrailPrefab;
-
-    private bool isJumping;
-    private float jumpHoldTimer;
 
     private bool isDashing = false;
     private float dashCooldownTimer = 0f;
+
+    [Header("Dash Trail Settings")]
+    public float dashTrailSpacing = 0.1f;
+    public float dashTrailOffset = 0.3f;
+
+    [Header("Dash Charge Settings")]
+    public int maxDashCharges = 2;
+    public int currentDashCharges = 2;
+
+    // Existing prefabs in your project:
+    public GameObject firstDashTrailPrefab;   // (blue)
+    public GameObject secondDashTrailPrefab;  // (pink)
+    public GameObject middleDashTrailPrefab;  // (white)
+
+    [Header("Dash Refill Tuning")]
+    [Tooltip("After dash ends, wait this long before allowing dash refills due to ground contact.")]
+    [SerializeField] private float dashEndRefillDelay = 0.08f;
+
+    [Header("Grounding (Robust Contact Based)")]
+    [Tooltip("How 'upward' a contact normal must be to count as ground.")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float groundNormalMinY = 0.6f;
+
+    [Tooltip("Extra tolerance above collider bottom for contact points.")]
+    [SerializeField] private float groundPointTolerance = 0.08f;
+
+    private float dashRefillAllowedAtTime = 0f;
 
     [Header("Parry Settings")]
     public GameObject parryShieldPrefab;
@@ -58,18 +79,6 @@ public class PlayerController : MonoBehaviour
 
     private float currentParryCooldownDuration;
 
-    [Header("Dash Trail Settings")]
-    public float dashTrailSpacing = 0.1f;
-    public float dashTrailOffset = 0.3f;
-
-    [Header("Dash Charge Settings")]
-    public int maxDashCharges = 2;
-    public int currentDashCharges = 2;
-
-    public GameObject firstDashTrailPrefab;
-    public GameObject secondDashTrailPrefab;
-    public GameObject middleDashTrailPrefab;
-
     [Header("Slash Attack")]
     public GameObject slashPrefab;
     public Transform slashSpawnPoint;
@@ -85,27 +94,28 @@ public class PlayerController : MonoBehaviour
     public float critMultiplier = 1.5f;
 
     private float nextAttackTime = 0f;
-    private bool jumpTriggered = false;
 
     private Animator anim;
     private Rigidbody2D rb;
-    private bool isGrounded;
+
     private float inputX;
 
-    // --- Damage flash ---
+    // Jump
+    private bool isJumping;
+    private float jumpHoldTimer;
+    private bool isGrounded;
+    private bool jumpTriggered = false;
+
+    // Damage flash
     [Header("Damage Flash")]
     [SerializeField] private float damageFlashDuration = 0.2f;
     [SerializeField] private Color damageFlashColor = new Color(1f, 0.2f, 0.2f, 1f);
     private SpriteRenderer spriteRenderer;
     private Coroutine flashRoutine;
 
-    // --- Base stats for collectibles ---
-    private float baseMoveSpeed;
-    private float baseJumpForce;
-    private int baseAttackDamage;
-    private float baseParrySuccessCooldown;
-    private float baseParryFailCooldown;
-    private int baseMaxDashCharges;
+    // Reusable contact arrays (avoids allocations)
+    private readonly ContactPoint2D[] contacts = new ContactPoint2D[16];
+    private ContactFilter2D groundFilter;
 
     void Start()
     {
@@ -117,13 +127,12 @@ public class PlayerController : MonoBehaviour
         col = GetComponent<Collider2D>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
-        // Store base values (so boosts stack cleanly)
-        baseMoveSpeed = moveSpeed;
-        baseJumpForce = jumpForce;
-        baseAttackDamage = attackDamage;
-        baseParrySuccessCooldown = parrySuccessCooldown;
-        baseParryFailCooldown = parryFailCooldown;
-        baseMaxDashCharges = maxDashCharges;
+        groundFilter = new ContactFilter2D
+        {
+            useLayerMask = true,
+            layerMask = groundLayer,
+            useTriggers = false
+        };
     }
 
     void Update()
@@ -131,13 +140,57 @@ public class PlayerController : MonoBehaviour
         inputX = Input.GetAxisRaw("Horizontal");
 
         HandleParry();
-        Move();
+
+        if (!isDashing)
+            Move();
+
         HandleJump();
-        CheckGround();
         HandleAttackInput();
         HandleDash();
         UpdateParryUI();
         UpdateAnimations();
+    }
+
+    void FixedUpdate()
+    {
+        UpdateGroundedState();
+
+        // Refill ONLY when grounded, not dashing, and after dash refill lock
+        if (isGrounded && !isDashing && Time.time >= dashRefillAllowedAtTime)
+        {
+            if (currentDashCharges < maxDashCharges)
+                currentDashCharges = maxDashCharges;
+
+            isJumping = false;
+        }
+    }
+
+    // ---------------- Grounding (ROBUST) ----------------
+    void UpdateGroundedState()
+    {
+        isGrounded = false;
+        if (!rb || !col) return;
+
+        int count = rb.GetContacts(groundFilter, contacts);
+        if (count <= 0) return;
+
+        float bottomY = col.bounds.min.y + groundPointTolerance;
+
+        for (int i = 0; i < count; i++)
+        {
+            var c = contacts[i];
+
+            // Must be a "floor-like" contact
+            if (c.normal.y < groundNormalMinY)
+                continue;
+
+            // Contact point should be near/below the bottom of collider
+            if (c.point.y > bottomY)
+                continue;
+
+            isGrounded = true;
+            return;
+        }
     }
 
     // ---------------- Collectibles ----------------
@@ -152,7 +205,7 @@ public class PlayerController : MonoBehaviour
             case CollectibleEffectType.ExtraDashCharge:
                 maxDashCharges += 1;
                 currentDashCharges = maxDashCharges;
-                hasDashItem = true; // if you want this collectible to also "enable" dash
+                hasDashItem = true;
                 break;
 
             case CollectibleEffectType.ParryCooldownMinus1:
@@ -217,6 +270,185 @@ public class PlayerController : MonoBehaviour
             parryCooldownFillImage.fillAmount = 1f - (parryCooldownTimer / currentParryCooldownDuration);
     }
 
+    // ---------------- Movement ----------------
+    void Move()
+    {
+        rb.linearVelocity = new Vector2(inputX * moveSpeed, rb.linearVelocity.y);
+
+        if (inputX != 0)
+        {
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * Mathf.Sign(inputX);
+            transform.localScale = scale;
+        }
+    }
+
+    void HandleJump()
+    {
+        if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isGrounded)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            isJumping = true;
+            jumpHoldTimer = maxJumpHoldTime;
+        }
+
+        if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isJumping)
+        {
+            if (jumpHoldTimer > 0f)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + jumpHoldForce * Time.deltaTime);
+                jumpHoldTimer -= Time.deltaTime;
+            }
+            else
+            {
+                isJumping = false;
+            }
+        }
+
+        if (Input.GetKeyUp(GameManager.Instance.Settings.jumpKey))
+        {
+            isJumping = false;
+
+            if (rb.linearVelocity.y > 0)
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+        }
+    }
+
+    // ---------------- Dash ----------------
+    void HandleDash()
+    {
+        if (dashCooldownTimer > 0)
+            dashCooldownTimer -= Time.deltaTime;
+
+        if (!hasDashItem) return;
+        if (isDashing) return;
+        if (dashCooldownTimer > 0) return;
+        if (currentDashCharges <= 0) return;
+
+        if (Input.GetKeyDown(GameManager.Instance.Settings.dashKey))
+        {
+            Vector2 dashDir = GetDashDirection();
+            if (dashDir != Vector2.zero)
+                StartCoroutine(PerformDash(dashDir));
+        }
+    }
+
+    Vector2 GetDashDirection()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float y = Input.GetAxisRaw("Vertical");
+        Vector2 dir = new Vector2(x, y);
+        if (dir.magnitude > 1) dir.Normalize();
+        return dir;
+    }
+
+    System.Collections.IEnumerator PerformDash(Vector2 direction)
+    {
+        isDashing = true;
+
+        // Spend a charge immediately and deterministically
+        currentDashCharges = Mathf.Max(0, currentDashCharges - 1);
+
+        dashCooldownTimer = dashCooldown;
+
+        // Lock refills until after dash ends + delay (prevents "free dash")
+        dashRefillAllowedAtTime = Time.time + dashDuration + dashEndRefillDelay;
+
+        // Decide trail color for this dash:
+        // - If maxDashCharges >= 3, the EXTRA dash (third) is fully white.
+        // We define "third dash" as: when you started the dash with 1 charge remaining after spending.
+        // Example: start at 3 -> after spending: 2 (dash #1), then 1 (dash #2), then 0 (dash #3 / extra)
+        bool thisIsExtraWhiteDash = (maxDashCharges >= 3 && currentDashCharges == 0);
+
+        GameObject edgeTrailPrefab = thisIsExtraWhiteDash ? middleDashTrailPrefab : GetDefaultEdgeTrailPrefab();
+
+        col.sharedMaterial = noFrictionMaterial;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+
+        float dashTime = 0f;
+        Vector2 dashDir = direction.normalized;
+        Vector2 perp = new Vector2(-dashDir.y, dashDir.x);
+
+        while (dashTime < dashDuration)
+        {
+            rb.linearVelocity = dashDir * dashForce;
+
+            // Center trail (white)
+            if (middleDashTrailPrefab)
+            {
+                var mid = Instantiate(middleDashTrailPrefab, transform.position, Quaternion.identity);
+                Destroy(mid, 1f);
+            }
+
+            // Edge trails
+            if (edgeTrailPrefab)
+            {
+                Vector2 leftPos = (Vector2)transform.position + perp * dashTrailOffset;
+                var left = Instantiate(edgeTrailPrefab, leftPos, Quaternion.identity);
+                Destroy(left, 1f);
+
+                Vector2 rightPos = (Vector2)transform.position - perp * dashTrailOffset;
+                var right = Instantiate(edgeTrailPrefab, rightPos, Quaternion.identity);
+                Destroy(right, 1f);
+            }
+
+            yield return new WaitForSeconds(dashTrailSpacing);
+            dashTime += dashTrailSpacing;
+        }
+
+        rb.gravityScale = originalGravity;
+        col.sharedMaterial = normalMaterial;
+        isDashing = false;
+    }
+
+    GameObject GetDefaultEdgeTrailPrefab()
+    {
+        // Preserve your original behavior:
+        // if currentDashCharges == 1 -> firstDashTrailPrefab, else -> secondDashTrailPrefab
+        // (this mirrors what you had before, just centralized)
+        return (currentDashCharges == 1) ? firstDashTrailPrefab : secondDashTrailPrefab;
+    }
+
+    // ---------------- Attack ----------------
+    void HandleAttackInput()
+    {
+        if (Time.time < nextAttackTime) return;
+
+        if (Input.GetKeyDown(GameManager.Instance.Settings.fire1Key))
+        {
+            nextAttackTime = Time.time + attackCooldown;
+            PerformAttack();
+        }
+    }
+
+    async Task PerformAttack()
+    {
+        anim.SetTrigger("Attack");
+    }
+
+    // CALLED BY ANIMATION EVENT
+    public void SpawnSlash()
+    {
+        if (!slashPrefab || !slashSpawnPoint) return;
+
+        GameObject slashObj = Instantiate(slashPrefab, slashSpawnPoint.position, Quaternion.identity);
+
+        Vector3 scale = slashObj.transform.localScale;
+        scale.x = Mathf.Abs(scale.x) * Mathf.Sign(transform.localScale.x);
+        slashObj.transform.localScale = scale;
+
+        SlashAttack slash = slashObj.GetComponent<SlashAttack>();
+        if (slash)
+        {
+            slash.Initialize(
+                attackDamage,
+                critChance,
+                critMultiplier
+            );
+        }
+    }
+
     // ---------------- Animations ----------------
     void UpdateAnimations()
     {
@@ -259,184 +491,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ---------------- Dash ----------------
-    System.Collections.IEnumerator PerformDash(Vector2 direction)
-    {
-        isDashing = true;
-        dashCooldownTimer = dashCooldown;
-        currentDashCharges--;
-
-        GameObject edgeTrailPrefab = (currentDashCharges == 1) ? firstDashTrailPrefab : secondDashTrailPrefab;
-
-        col.sharedMaterial = noFrictionMaterial;
-        float originalGravity = rb.gravityScale;
-        rb.gravityScale = 0f;
-
-        float dashTime = 0f;
-        Vector2 dashDir = direction.normalized;
-        Vector2 perp = new Vector2(-dashDir.y, dashDir.x);
-
-        while (dashTime < dashDuration)
-        {
-            rb.linearVelocity = dashDir * dashForce;
-
-            if (middleDashTrailPrefab)
-            {
-                GameObject mid = Instantiate(middleDashTrailPrefab, transform.position, Quaternion.identity);
-                Destroy(mid, 1f);
-            }
-
-            if (edgeTrailPrefab)
-            {
-                Vector2 leftPos = (Vector2)transform.position + perp * dashTrailOffset;
-                GameObject left = Instantiate(edgeTrailPrefab, leftPos, Quaternion.identity);
-                Destroy(left, 1f);
-            }
-
-            if (edgeTrailPrefab)
-            {
-                Vector2 rightPos = (Vector2)transform.position - perp * dashTrailOffset;
-                GameObject right = Instantiate(edgeTrailPrefab, rightPos, Quaternion.identity);
-                Destroy(right, 1f);
-            }
-
-            yield return new WaitForSeconds(dashTrailSpacing);
-            dashTime += dashTrailSpacing;
-        }
-
-        rb.gravityScale = originalGravity;
-        col.sharedMaterial = normalMaterial;
-        isDashing = false;
-    }
-
-    Vector2 GetDashDirection()
-    {
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-        Vector2 dir = new Vector2(x, y);
-        if (dir.magnitude > 1) dir.Normalize();
-        return dir;
-    }
-
-    void HandleDash()
-    {
-        if (dashCooldownTimer > 0)
-            dashCooldownTimer -= Time.deltaTime;
-
-        if (!hasDashItem) return;
-        if (isDashing) return;
-        if (dashCooldownTimer > 0) return;
-        if (currentDashCharges <= 0) return;
-
-        if (Input.GetKeyDown(GameManager.Instance.Settings.dashKey))
-        {
-            Vector2 dashDir = GetDashDirection();
-            if (dashDir != Vector2.zero)
-                StartCoroutine(PerformDash(dashDir));
-        }
-    }
-
-    // ---------------- Movement ----------------
-    void Move()
-    {
-        rb.linearVelocity = new Vector2(inputX * moveSpeed, rb.linearVelocity.y);
-
-        if (inputX != 0)
-        {
-            Vector3 scale = transform.localScale;
-            scale.x = Mathf.Abs(scale.x) * Mathf.Sign(inputX);
-            transform.localScale = scale;
-        }
-    }
-
-    void HandleJump()
-    {
-        if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isGrounded)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            isJumping = true;
-            jumpHoldTimer = maxJumpHoldTime;
-        }
-
-        // NOTE: your original had GetKeyDown here (that will never “hold”).
-        // I’m leaving logic as-is to avoid changing feel unless you want it fixed later.
-        if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isJumping)
-        {
-            if (jumpHoldTimer > 0f)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + jumpHoldForce * Time.deltaTime);
-                jumpHoldTimer -= Time.deltaTime;
-            }
-            else
-            {
-                isJumping = false;
-            }
-        }
-
-        if (Input.GetKeyUp(GameManager.Instance.Settings.jumpKey))
-        {
-            isJumping = false;
-
-            if (rb.linearVelocity.y > 0)
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-        }
-    }
-
-    void CheckGround()
-    {
-        isGrounded = false;
-
-        RaycastHit2D hit = Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckRadius, groundLayer);
-        if (hit.collider != null)
-        {
-            if (Vector2.Angle(hit.normal, Vector2.up) < 45f)
-            {
-                isGrounded = true;
-                currentDashCharges = maxDashCharges;
-                isJumping = false;
-            }
-        }
-    }
-
-    // ---------------- Attack ----------------
-    void HandleAttackInput()
-    {
-        if (Time.time < nextAttackTime) return;
-
-        if (Input.GetKeyDown(GameManager.Instance.Settings.fire1Key))
-        {
-            nextAttackTime = Time.time + attackCooldown;
-            PerformAttack();
-        }
-    }
-
-    async Task PerformAttack()
-    {
-        anim.SetTrigger("Attack");
-    }
-
-    // CALLED BY ANIMATION EVENT
-    public void SpawnSlash()
-    {
-        if (!slashPrefab || !slashSpawnPoint) return;
-
-        GameObject slashObj = Instantiate(slashPrefab, slashSpawnPoint.position, Quaternion.identity);
-
-        Vector3 scale = slashObj.transform.localScale;
-        scale.x = Mathf.Abs(scale.x) * Mathf.Sign(transform.localScale.x);
-        slashObj.transform.localScale = scale;
-
-        SlashAttack slash = slashObj.GetComponent<SlashAttack>();
-        if (slash)
-        {
-            slash.Initialize(
-                attackDamage,
-                critChance,
-                critMultiplier
-            );
-        }
-    }
-
     // ---------------- Damage ----------------
     public void TakeDamage(int amount)
     {
@@ -449,7 +503,6 @@ public class PlayerController : MonoBehaviour
         }
 
         currentHealth -= amount;
-
         FlashDamage();
 
         if (currentHealth <= 0)

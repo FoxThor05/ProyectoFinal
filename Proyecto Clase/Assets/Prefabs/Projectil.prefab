@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5243588769428922215}
   - component: {fileID: 2881412070281875541}
   - component: {fileID: 1965491024889693508}
-  - component: {fileID: 3085346157425019596}
+  - component: {fileID: 3432887598982981538}
   m_Layer: 0
   m_Name: Projectil
   m_TagString: Projectile
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: ea2b55386e459ec4e983f6ad53231de8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3ef3ace01967d6a4d99079bb5cfd72b4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -134,8 +134,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
---- !u!58 &3085346157425019596
-CircleCollider2D:
+--- !u!70 &3432887598982981538
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -168,5 +168,6 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.3159872, y: 0}
-  m_Radius: 0.14748299
+  m_Offset: {x: 3.5738446e-10, y: 0.0029979586}
+  m_Size: {x: 1.0000002, y: 0.5139052}
+  m_Direction: 1
