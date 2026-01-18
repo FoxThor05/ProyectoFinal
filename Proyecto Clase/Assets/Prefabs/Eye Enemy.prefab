@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3803411873855072874}
   - component: {fileID: 1935722472836472018}
   - component: {fileID: 4530855401895827575}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: Eye Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -116,7 +116,8 @@ MonoBehaviour:
   projectileSpeed: 7.5
   projectileDamage: 10
   maxHealth: 50
-  damagePopupPrefab: {fileID: 0}
+  flashDuration: 0.2
+  flashColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!58 &1935722472836472018
 CircleCollider2D:
   m_ObjectHideFlags: 0

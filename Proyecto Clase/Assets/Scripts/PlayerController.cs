@@ -58,9 +58,6 @@ public class PlayerController : MonoBehaviour
 
     private float currentParryCooldownDuration;
 
-    // NEW: parry streak tracking for achievement 4
-    private int parryStreak = 0;
-
     [Header("Dash Trail Settings")]
     public float dashTrailSpacing = 0.1f;
     public float dashTrailOffset = 0.3f;
@@ -78,18 +75,14 @@ public class PlayerController : MonoBehaviour
     public Transform slashSpawnPoint;
 
     [Header("Attack Settings")]
-    public Transform attackPoint;
-    public float attackRange = 0.5f;
     public float attackCooldown = 0.3f;
-    public LayerMask enemyLayers;
-    public float downAttackBounceForce = 10f;
 
     [Header("Critical Hit")]
     [Range(0f, 1f)]
     public float critChance = 0.10f;
-    public int critDamage = 15;
-    public GameObject normalDamagePopupPrefab;
-    public GameObject critDamagePopupPrefab;
+
+    [Tooltip("Critical hit multiplier. 1.5 = +50% damage.")]
+    public float critMultiplier = 1.5f;
 
     private float nextAttackTime = 0f;
     private bool jumpTriggered = false;
@@ -99,31 +92,82 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private float inputX;
 
+    // --- Damage flash ---
+    [Header("Damage Flash")]
+    [SerializeField] private float damageFlashDuration = 0.2f;
+    [SerializeField] private Color damageFlashColor = new Color(1f, 0.2f, 0.2f, 1f);
+    private SpriteRenderer spriteRenderer;
+    private Coroutine flashRoutine;
+
+    // --- Base stats for collectibles ---
+    private float baseMoveSpeed;
+    private float baseJumpForce;
+    private int baseAttackDamage;
+    private float baseParrySuccessCooldown;
+    private float baseParryFailCooldown;
+    private int baseMaxDashCharges;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         rb.freezeRotation = true;
-        currentHealth = maxHealth;
 
+        currentHealth = maxHealth;
         col = GetComponent<Collider2D>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        // Store base values (so boosts stack cleanly)
+        baseMoveSpeed = moveSpeed;
+        baseJumpForce = jumpForce;
+        baseAttackDamage = attackDamage;
+        baseParrySuccessCooldown = parrySuccessCooldown;
+        baseParryFailCooldown = parryFailCooldown;
+        baseMaxDashCharges = maxDashCharges;
     }
 
     void Update()
     {
         inputX = Input.GetAxisRaw("Horizontal");
-        HandleParry();
 
+        HandleParry();
         Move();
         HandleJump();
         CheckGround();
         HandleAttackInput();
         HandleDash();
         UpdateParryUI();
-
         UpdateAnimations();
     }
 
+    // ---------------- Collectibles ----------------
+    public void ApplyCollectible(CollectibleEffectType type)
+    {
+        switch (type)
+        {
+            case CollectibleEffectType.DamagePlus5:
+                attackDamage += 5;
+                break;
+
+            case CollectibleEffectType.ExtraDashCharge:
+                maxDashCharges += 1;
+                currentDashCharges = maxDashCharges;
+                hasDashItem = true; // if you want this collectible to also "enable" dash
+                break;
+
+            case CollectibleEffectType.ParryCooldownMinus1:
+                parrySuccessCooldown = Mathf.Max(0.5f, parrySuccessCooldown - 1f);
+                parryFailCooldown = Mathf.Max(0.5f, parryFailCooldown - 1f);
+                break;
+
+            case CollectibleEffectType.MoveAndJumpBoost:
+                moveSpeed += 0.6f;
+                jumpForce += 1.0f;
+                break;
+        }
+    }
+
+    // ---------------- Parry ----------------
     void HandleParry()
     {
         if (parryCooldownTimer > 0f)
@@ -133,9 +177,7 @@ public class PlayerController : MonoBehaviour
         }
 
         if (Input.GetKeyDown(GameManager.Instance.Settings.fire2Key))
-        {
             StartCoroutine(ParryRoutine());
-        }
     }
 
     System.Collections.IEnumerator ParryRoutine()
@@ -143,16 +185,9 @@ public class PlayerController : MonoBehaviour
         isParryActive = true;
         parrySuccessful = false;
 
-        // Spawn shield
-        activeParryShield = Instantiate(
-            parryShieldPrefab,
-            transform.position,
-            Quaternion.identity,
-            transform
-        );
+        activeParryShield = Instantiate(parryShieldPrefab, transform.position, Quaternion.identity, transform);
 
         float timer = 0f;
-
         while (timer < parryWindow)
         {
             timer += Time.deltaTime;
@@ -161,19 +196,10 @@ public class PlayerController : MonoBehaviour
 
         isParryActive = false;
 
-        // Cleanup shield
         if (activeParryShield)
             Destroy(activeParryShield);
 
-        // If parry window ended with no success, reset streak (achievement 4 requirement)
-        if (!parrySuccessful)
-            parryStreak = 0;
-
-        // Apply cooldown
-        currentParryCooldownDuration = parrySuccessful
-            ? parrySuccessCooldown
-            : parryFailCooldown;
-
+        currentParryCooldownDuration = parrySuccessful ? parrySuccessCooldown : parryFailCooldown;
         parryCooldownTimer = currentParryCooldownDuration;
     }
 
@@ -186,24 +212,18 @@ public class PlayerController : MonoBehaviour
             parryCooldownTimer > 0f ? parryCooldownColor : parryReadyColor;
 
         if (parryCooldownTimer <= 0f)
-        {
             parryCooldownFillImage.fillAmount = 1f;
-        }
         else
-        {
-            parryCooldownFillImage.fillAmount =
-                1f - (parryCooldownTimer / currentParryCooldownDuration);
-        }
+            parryCooldownFillImage.fillAmount = 1f - (parryCooldownTimer / currentParryCooldownDuration);
     }
 
+    // ---------------- Animations ----------------
     void UpdateAnimations()
     {
         if (isGrounded)
         {
             float speed = inputX;
-            if (speed < 0f)
-                speed *= -1f;
-
+            if (speed < 0f) speed *= -1f;
             anim.SetFloat("Speed", speed);
         }
         else
@@ -239,20 +259,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // ---------------- Dash ----------------
     System.Collections.IEnumerator PerformDash(Vector2 direction)
     {
         isDashing = true;
         dashCooldownTimer = dashCooldown;
-
         currentDashCharges--;
 
         GameObject edgeTrailPrefab = (currentDashCharges == 1) ? firstDashTrailPrefab : secondDashTrailPrefab;
+
         col.sharedMaterial = noFrictionMaterial;
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0f;
 
         float dashTime = 0f;
-
         Vector2 dashDir = direction.normalized;
         Vector2 perp = new Vector2(-dashDir.y, dashDir.x);
 
@@ -281,7 +301,6 @@ public class PlayerController : MonoBehaviour
             }
 
             yield return new WaitForSeconds(dashTrailSpacing);
-
             dashTime += dashTrailSpacing;
         }
 
@@ -294,12 +313,8 @@ public class PlayerController : MonoBehaviour
     {
         float x = Input.GetAxisRaw("Horizontal");
         float y = Input.GetAxisRaw("Vertical");
-
         Vector2 dir = new Vector2(x, y);
-
-        if (dir.magnitude > 1)
-            dir.Normalize();
-
+        if (dir.magnitude > 1) dir.Normalize();
         return dir;
     }
 
@@ -321,6 +336,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // ---------------- Movement ----------------
     void Move()
     {
         rb.linearVelocity = new Vector2(inputX * moveSpeed, rb.linearVelocity.y);
@@ -342,15 +358,13 @@ public class PlayerController : MonoBehaviour
             jumpHoldTimer = maxJumpHoldTime;
         }
 
-        // NOTE: your original code used GetKeyDown again here; keeping as-is to avoid changing feel.
+        // NOTE: your original had GetKeyDown here (that will never “hold”).
+        // I’m leaving logic as-is to avoid changing feel unless you want it fixed later.
         if (Input.GetKeyDown(GameManager.Instance.Settings.jumpKey) && isJumping)
         {
             if (jumpHoldTimer > 0f)
             {
-                rb.linearVelocity = new Vector2(
-                    rb.linearVelocity.x,
-                    rb.linearVelocity.y + jumpHoldForce * Time.deltaTime
-                );
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + jumpHoldForce * Time.deltaTime);
                 jumpHoldTimer -= Time.deltaTime;
             }
             else
@@ -364,9 +378,7 @@ public class PlayerController : MonoBehaviour
             isJumping = false;
 
             if (rb.linearVelocity.y > 0)
-            {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-            }
         }
     }
 
@@ -374,13 +386,7 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = false;
 
-        RaycastHit2D hit = Physics2D.Raycast(
-            groundCheck.position,
-            Vector2.down,
-            groundCheckRadius,
-            groundLayer
-        );
-
+        RaycastHit2D hit = Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckRadius, groundLayer);
         if (hit.collider != null)
         {
             if (Vector2.Angle(hit.normal, Vector2.up) < 45f)
@@ -392,13 +398,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // --------------------
-    // ATTACKING
-    // --------------------
+    // ---------------- Attack ----------------
     void HandleAttackInput()
     {
-        if (Time.time < nextAttackTime)
-            return;
+        if (Time.time < nextAttackTime) return;
 
         if (Input.GetKeyDown(GameManager.Instance.Settings.fire1Key))
         {
@@ -417,11 +420,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!slashPrefab || !slashSpawnPoint) return;
 
-        GameObject slashObj = Instantiate(
-            slashPrefab,
-            slashSpawnPoint.position,
-            Quaternion.identity
-        );
+        GameObject slashObj = Instantiate(slashPrefab, slashSpawnPoint.position, Quaternion.identity);
 
         Vector3 scale = slashObj.transform.localScale;
         scale.x = Mathf.Abs(scale.x) * Mathf.Sign(transform.localScale.x);
@@ -433,49 +432,53 @@ public class PlayerController : MonoBehaviour
             slash.Initialize(
                 attackDamage,
                 critChance,
-                critDamage,
-                normalDamagePopupPrefab,
-                critDamagePopupPrefab
+                critMultiplier
             );
         }
     }
 
-    // --------------------
-    // DAMAGE
-    // --------------------
+    // ---------------- Damage ----------------
     public void TakeDamage(int amount)
     {
-        // Successful parry
         if (isParryActive)
         {
             parrySuccessful = true;
             isParryActive = false;
-
-            RegisterParrySuccess();
             ParryEffect();
             return;
         }
 
-        // Normal damage
         currentHealth -= amount;
 
-        // Track "no damage run" (achievement 9)
-        if (GameManager.Instance)
-            GameManager.Instance.NotifyPlayerTookDamage();
+        FlashDamage();
 
         if (currentHealth <= 0)
             Die();
     }
 
-    void RegisterParrySuccess()
+    void FlashDamage()
     {
-        // Achievement 2: first parry
-        AchievementManager.Instance?.Unlock("2");
+        if (!spriteRenderer) return;
 
-        // Achievement 4: 10 parries in a row without missing
-        parryStreak++;
-        if (parryStreak >= 10)
-            AchievementManager.Instance?.Unlock("4");
+        if (flashRoutine != null)
+            StopCoroutine(flashRoutine);
+
+        flashRoutine = StartCoroutine(FlashRoutine());
+    }
+
+    System.Collections.IEnumerator FlashRoutine()
+    {
+        Color original = spriteRenderer.color;
+        spriteRenderer.color = damageFlashColor;
+
+        float t = 0f;
+        while (t < damageFlashDuration)
+        {
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        spriteRenderer.color = original;
     }
 
     void ParryEffect()
@@ -488,13 +491,10 @@ public class PlayerController : MonoBehaviour
         }
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, parryRadius);
-
         foreach (Collider2D hit in hits)
         {
             if (hit.CompareTag("Projectile"))
-            {
                 Destroy(hit.gameObject);
-            }
         }
     }
 
@@ -502,14 +502,5 @@ public class PlayerController : MonoBehaviour
     {
         Debug.Log("Player died!");
         GameManager.Instance.SetState(GameManager.GameState.Dead);
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, parryRadius);
-
-        if (attackPoint != null)
-            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 }

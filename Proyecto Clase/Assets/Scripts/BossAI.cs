@@ -84,6 +84,15 @@ public class BossAI : MonoBehaviour, IDamageable
     [Tooltip("Assign the child capsule trigger here (recommended). If empty, BossAI will try to find a child named 'BossPushAura'.")]
     [SerializeField] private CapsuleCollider2D auraTrigger;
 
+    [Header("Boss Damage Flash (soft)")]
+    [SerializeField] private float damageFlashDuration = 0.2f;
+
+    [Tooltip("Softer red than normal enemies.")]
+    [SerializeField] private Color damageFlashColor = new Color(1f, 0.7f, 0.7f, 1f);
+
+    private SpriteRenderer spriteRenderer;
+    private Coroutine flashRoutine;
+
     private Animator anim;
     private BossAttack? lastAttack = null;
     private bool phase50Triggered = false;
@@ -111,6 +120,7 @@ public class BossAI : MonoBehaviour, IDamageable
     void Start()
     {
         anim = GetComponent<Animator>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         maxHealth = Mathf.RoundToInt(maxHealth * Tuning.maxHpMultiplier);
         currentHealth = maxHealth;
@@ -172,6 +182,8 @@ public class BossAI : MonoBehaviour, IDamageable
     {
         currentHealth -= damage;
 
+        FlashDamage();
+
         if (!phase50Triggered && currentHealth <= maxHealth * 0.5f)
         {
             phase50Triggered = true;
@@ -186,6 +198,31 @@ public class BossAI : MonoBehaviour, IDamageable
 
         if (currentHealth <= 0)
             anim.SetTrigger("Defeat");
+    }
+
+    void FlashDamage()
+    {
+        if (!spriteRenderer) return;
+
+        if (flashRoutine != null)
+            StopCoroutine(flashRoutine);
+
+        flashRoutine = StartCoroutine(FlashRoutine());
+    }
+
+    IEnumerator FlashRoutine()
+    {
+        Color original = spriteRenderer.color;
+        spriteRenderer.color = damageFlashColor;
+
+        float t = 0f;
+        while (t < damageFlashDuration)
+        {
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        spriteRenderer.color = original;
     }
 
     // CALLED BY DEFEAT ANIMATION EVENT

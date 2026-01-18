@@ -165,4 +165,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SlashAttack
   enemyLayers:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 64

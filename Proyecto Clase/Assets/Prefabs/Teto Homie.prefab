@@ -193,7 +193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   speed: 5
-  turnSpeed: 100
+  turnSpeed: 45
   lifeTime: 7
   damage: 5
   target: {fileID: 0}

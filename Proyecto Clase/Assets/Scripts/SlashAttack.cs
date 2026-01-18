@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SlashAttack : MonoBehaviour
@@ -8,66 +7,51 @@ public class SlashAttack : MonoBehaviour
 
     private int baseDamage;
     private float critChance;
-    private int critDamage;
+    private float critMultiplier = 1.5f;
 
-    private GameObject normalPopup;
-    private GameObject critPopup;
+    private bool hasHit = false;
+    private Collider2D slashCol;
 
-    // Track unique targets hit by this slash instance
-    private readonly HashSet<IDamageable> hitTargets = new HashSet<IDamageable>();
-
-    // Combo achievement (id "3") should trigger once per slash
-    private bool comboTriggered = false;
-
-    public void Initialize(
-        int damage,
-        float critChance,
-        int critDamage,
-        GameObject normalPopup,
-        GameObject critPopup
-    )
+    // Called by Player when spawned
+    public void Initialize(int damage, float critChance, float critMultiplier)
     {
         this.baseDamage = damage;
         this.critChance = critChance;
-        this.critDamage = critDamage;
-        this.normalPopup = normalPopup;
-        this.critPopup = critPopup;
+        this.critMultiplier = critMultiplier;
+    }
+
+    void Awake()
+    {
+        slashCol = GetComponent<Collider2D>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (hasHit) return;
+
         IDamageable damageable = other.GetComponent<IDamageable>();
         if (damageable == null) return;
 
-        // Prevent multi-hitting the same enemy with the same slash
-        if (hitTargets.Contains(damageable)) return;
-
-        hitTargets.Add(damageable);
-
         bool isCrit = Random.value < critChance;
-        int damage = isCrit ? critDamage : baseDamage;
+        int damage = isCrit
+            ? Mathf.RoundToInt(baseDamage * critMultiplier)
+            : baseDamage;
 
+        // Apply damage
         damageable.TakeDamage(damage);
 
-        // Popup
-        GameObject popup = isCrit ? critPopup : normalPopup;
-        if (popup)
-        {
-            Vector3 offset = new Vector3(
-                Random.Range(-0.2f, 0.2f),
-                Random.Range(0.4f, 0.6f),
-                0f
-            );
+        // Hit point: closest point on the enemy collider from the slash collider center
+        Vector3 origin = slashCol ? slashCol.bounds.center : transform.position;
+        Vector3 hitPoint = other.ClosestPoint(origin);
 
-            Instantiate(popup, other.transform.position + offset, Quaternion.identity);
-        }
+        // Slight upward/random offset so it looks nicer
+        hitPoint += new Vector3(Random.Range(-0.1f, 0.1f), Random.Range(0.15f, 0.25f), 0f);
 
-        // Combo achievement: hit 2 enemies with one attack (slash instance)
-        if (!comboTriggered && hitTargets.Count >= 2)
-        {
-            comboTriggered = true;
-            AchievementManager.Instance?.Unlock("3");
-        }
+        // Global popup
+        if (DamagePopupManager.Instance)
+            DamagePopupManager.Instance.Spawn(damage, isCrit, hitPoint);
+
+        hasHit = true;
     }
 
     // CALLED BY ANIMATION EVENT (last frame)
