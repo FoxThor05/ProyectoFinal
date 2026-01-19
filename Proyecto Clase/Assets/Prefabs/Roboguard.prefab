@@ -112,43 +112,43 @@ MonoBehaviour:
   useGameSettingsDifficulty: 1
   easy:
     enabled: 1
-    maxHealth: 50
-    chaseSpeed: 2
+    maxHealth: 20
+    chaseSpeed: 3
     retreatSpeed: 1
     stopSmoothing: 5
-    fireRate: 1.2
-    projectileSpeed: 6
-    projectileDamage: 10
+    fireRate: 2
+    projectileSpeed: 5
+    projectileDamage: 5
   normal:
     enabled: 1
-    maxHealth: 50
-    chaseSpeed: 2
-    retreatSpeed: 1
+    maxHealth: 30
+    chaseSpeed: 4
+    retreatSpeed: 1.25
     stopSmoothing: 5
-    fireRate: 1.2
+    fireRate: 1.75
     projectileSpeed: 6
     projectileDamage: 10
   hard:
     enabled: 1
-    maxHealth: 50
-    chaseSpeed: 2
-    retreatSpeed: 1
+    maxHealth: 40
+    chaseSpeed: 5
+    retreatSpeed: 1.75
     stopSmoothing: 5
-    fireRate: 1.2
-    projectileSpeed: 6
+    fireRate: 1.25
+    projectileSpeed: 8
     projectileDamage: 10
   nightmare:
     enabled: 1
     maxHealth: 50
-    chaseSpeed: 2
-    retreatSpeed: 1
+    chaseSpeed: 6
+    retreatSpeed: 2
     stopSmoothing: 5
-    fireRate: 1.2
-    projectileSpeed: 6
-    projectileDamage: 10
+    fireRate: 1
+    projectileSpeed: 8
+    projectileDamage: 15
   projectilePrefab: {fileID: 3058704628885583182, guid: b2a33c5940d3c9e42b8bfc6b19acb713, type: 3}
   flashDuration: 0.2
-  flashColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  flashColor: {r: 1, g: 0.15566039, b: 0.15566039, a: 1}
 --- !u!58 &1935722472836472018
 CircleCollider2D:
   m_ObjectHideFlags: 0
