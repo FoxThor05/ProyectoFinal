@@ -6,6 +6,19 @@ public class PlayerController : MonoBehaviour
     [Header("Dash Crit Collectible")]
     public bool hasDashGuaranteedCrit = false;
 
+    [Header("Dash Movement Gating")]
+    [SerializeField] private float dashMoveMinSpeed = 0.25f;   // tweak if needed
+    [SerializeField] private float dashMoveGrace = 0.08f;      // a couple frames of grace
+
+    private float lastDashMoveTime = -999f;
+    private bool isDashMoving = false;
+
+    [Header("Dash Collision Stop")]
+    [SerializeField] private LayerMask dashBlockLayers; // set this in Inspector (usually Ground + Platforms + Walls)
+    [SerializeField] private float dashBlockedCheckDistance = 0.08f;
+    [SerializeField] private float dashBlockedMinDot = 0.7f; // how "in front" a normal must be to count as blocking
+
+
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float jumpForce = 12f;
@@ -165,6 +178,19 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         UpdateGroundedState();
+        // Confirm real dash motion using physics-resolved velocity
+        if (isDashing && rb != null)
+        {
+            // If we are actually moving at meaningful speed, mark dash-moving "recently"
+            if (rb.linearVelocity.sqrMagnitude >= dashMoveMinSpeed * dashMoveMinSpeed)
+                lastDashMoveTime = Time.time;
+
+            isDashMoving = (Time.time - lastDashMoveTime) <= dashMoveGrace;
+        }
+        else
+        {
+            isDashMoving = false;
+        }
 
         // Refill ONLY when grounded, not dashing, and after dash refill lock
         if (isGrounded && !isDashing && Time.time >= dashRefillAllowedAtTime)
@@ -374,11 +400,7 @@ public class PlayerController : MonoBehaviour
         dashRefillAllowedAtTime = Time.time + dashDuration + dashEndRefillDelay;
 
         // Decide trail color for this dash:
-        // - If maxDashCharges >= 3, the EXTRA dash (third) is fully white.
-        // We define "third dash" as: when you started the dash with 1 charge remaining after spending.
-        // Example: start at 3 -> after spending: 2 (dash #1), then 1 (dash #2), then 0 (dash #3 / extra)
         bool thisIsExtraWhiteDash = (maxDashCharges >= 3 && currentDashCharges == 0);
-
         GameObject edgeTrailPrefab = thisIsExtraWhiteDash ? middleDashTrailPrefab : GetDefaultEdgeTrailPrefab();
 
         col.sharedMaterial = noFrictionMaterial;
@@ -387,12 +409,66 @@ public class PlayerController : MonoBehaviour
 
         float dashTime = 0f;
         Vector2 dashDir = direction.normalized;
+
+        // Safety: no direction, no dash
+        if (dashDir.sqrMagnitude < 0.0001f)
+        {
+            rb.gravityScale = originalGravity;
+            col.sharedMaterial = normalMaterial;
+            isDashing = false;
+            yield break;
+        }
+
         Vector2 perp = new Vector2(-dashDir.y, dashDir.x);
+
+        // Reuse a filter so we only hit solid colliders
+        ContactFilter2D blockFilter = new ContactFilter2D
+        {
+            useLayerMask = true,
+            layerMask = dashBlockLayers,
+            useTriggers = false
+        };
+
+        // Reusable contacts array (small, no alloc)
+        ContactPoint2D[] dashContacts = new ContactPoint2D[16];
 
         while (dashTime < dashDuration)
         {
             rb.linearVelocity = dashDir * dashForce;
 
+            // --- EARLY STOP CHECK: are we blocked in dash direction? ---
+            bool blocked = false;
+
+            // Query current contacts after physics resolves (best effort):
+            // Wait for FixedUpdate boundary for more reliable contact data
+            yield return new WaitForFixedUpdate();
+
+            int count = rb.GetContacts(blockFilter, dashContacts);
+            if (count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    // Contact normal points away from the other collider.
+                    // If the normal points opposite our dash direction, we're hitting something "in front".
+                    float dot = Vector2.Dot(dashContacts[i].normal, -dashDir);
+
+                    if (dot >= dashBlockedMinDot)
+                    {
+                        // Also ensure we’re actually at/near the obstacle (avoid weird edge cases)
+                        blocked = true;
+                        break;
+                    }
+                }
+            }
+
+            if (blocked)
+            {
+                // Stop movement immediately and end dash
+                rb.linearVelocity = Vector2.zero;
+                break;
+            }
+
+            // --- TRAILS (run on the same cadence as your spacing) ---
             // Center trail (white)
             if (middleDashTrailPrefab)
             {
@@ -412,6 +488,7 @@ public class PlayerController : MonoBehaviour
                 Destroy(right, 1f);
             }
 
+            // Advance time using your spacing
             yield return new WaitForSeconds(dashTrailSpacing);
             dashTime += dashTrailSpacing;
         }
@@ -420,6 +497,7 @@ public class PlayerController : MonoBehaviour
         col.sharedMaterial = normalMaterial;
         isDashing = false;
     }
+
 
     GameObject GetDefaultEdgeTrailPrefab()
     {
@@ -521,20 +599,25 @@ public class PlayerController : MonoBehaviour
             parrySuccessful = true;
             isParryActive = false;
 
-            // ---------------- Parry Achievements (RESTORED) ----------------
             RegisterParrySuccess();
-            // ---------------------------------------------------------------
-
             ParryEffect();
-            return;
+            return; // No damage taken => should NOT count against flawless
         }
 
+        if (amount <= 0) return;
+
         currentHealth -= amount;
+
+        // Mark run as "not flawless" the first time real damage is taken
+        if (GameManager.Instance != null)
+            GameManager.Instance.NotifyPlayerTookDamage();
+
         FlashDamage();
 
         if (currentHealth <= 0)
             Die();
-    }  
+    }
+
 
     // ---------------- Parry Achievements helper (RESTORED) ----------------
     void RegisterParrySuccess()
