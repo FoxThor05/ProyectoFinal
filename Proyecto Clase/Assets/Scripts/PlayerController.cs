@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Dash Crit Collectible")]
+    public bool hasDashGuaranteedCrit = false;
+
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float jumpForce = 12f;
@@ -224,6 +227,9 @@ public class PlayerController : MonoBehaviour
             case CollectibleEffectType.MoveAndJumpBoost:
                 moveSpeed += 0.6f;
                 jumpForce += 1.0f;
+                break;
+            case CollectibleEffectType.DashGuaranteedCrit:
+                hasDashGuaranteedCrit = true;
                 break;
         }
     }
@@ -454,11 +460,14 @@ public class PlayerController : MonoBehaviour
         SlashAttack slash = slashObj.GetComponent<SlashAttack>();
         if (slash)
         {
+            float effectiveCritChance = (isDashing && hasDashGuaranteedCrit) ? 1f : critChance;
+
             slash.Initialize(
                 attackDamage,
-                critChance,
+                effectiveCritChance,
                 critMultiplier
             );
+
         }
     }
 
