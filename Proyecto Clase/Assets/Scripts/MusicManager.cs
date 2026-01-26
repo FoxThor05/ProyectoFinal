@@ -19,7 +19,13 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioSource musicSource;
 
     [Header("Music Clips")]
+    [SerializeField] private AudioClip menuMusicOriginal;
+    [SerializeField] private AudioClip menuMusicOrchestra;
+    [SerializeField] private AudioClip menuMusicRetro;
     [SerializeField] private AudioClip menuMusic;
+    [SerializeField] private AudioClip normalMusicOriginal;
+    [SerializeField] private AudioClip normalMusicOrchestra;
+    [SerializeField] private AudioClip normalMusicRetro;
     [SerializeField] private AudioClip normalMusic;
     [SerializeField] private AudioClip bossMusic;
 
@@ -40,6 +46,9 @@ public class MusicManager : MonoBehaviour
     [Header("Scene Auto-Logic")]
     [Tooltip("Any scene name in this list will auto-play menuMusic on load.")]
     [SerializeField] private string[] menuSceneNames = new string[] { "MenuInicial", "MainMenu" };
+
+    // ---------------- MUSIC TRACKING ----------------
+    public string musicType;
 
     private Coroutine fadeRoutine;
     private MusicMode currentMode = MusicMode.None;
@@ -78,6 +87,30 @@ public class MusicManager : MonoBehaviour
     void Start()
     {
         ApplySavedVolume();
+    }
+
+    // ---------------- MUSIC CHANGE ----------------
+    public void ChangeMusicType(string type)
+    {
+        musicType = type;
+        switch (musicType)
+        {
+            case ("8 Bit"):
+                menuMusic = menuMusicRetro;
+                normalMusic = normalMusicRetro;
+                break;
+            case ("Original"):
+                menuMusic = menuMusicOriginal;
+                normalMusic = normalMusicOriginal;
+                break;
+            case ("Orchestral"):
+                menuMusic = menuMusicOrchestra;
+                normalMusic = normalMusicOrchestra;
+                break;
+            default:
+                break;
+        }
+        ApplySceneMusic(SceneManager.GetActiveScene().name, force: false);
     }
 
     // ---------------- PUBLIC API ----------------
